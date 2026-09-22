@@ -1,7 +1,14 @@
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import Button from '../ui/Button'
 import { PRIMARY_NAV, SECONDARY_NAV } from '../../utils/navigation'
+
+// Lazy-loaded: SearchOverlay pulls in the full search index (every course/
+// knowledge/career/certification/learning-path/glossary record). Header
+// renders on every route via PublicLayout, so eagerly importing it here
+// would put that entire index in the bundle every page pays for on first
+// load — it should only load once someone actually opens search.
+const SearchOverlay = lazy(() => import('./SearchOverlay'))
 
 /**
  * Sticky header. Glass surface only applies once scrolled (spec §6: glass
@@ -13,6 +20,7 @@ import { PRIMARY_NAV, SECONDARY_NAV } from '../../utils/navigation'
 export default function Header() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
   const firstMobileLinkRef = useRef(null)
 
   useEffect(() => {
@@ -60,13 +68,14 @@ export default function Header() {
               {item.label}
             </NavLink>
           ))}
-          <a
-            href="/knowledge-center/search"
+          <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
             aria-label="Search Knowledge Center"
             className="text-text-inverse-muted hover:text-text-inverse"
           >
             <SearchIcon />
-          </a>
+          </button>
           <Button to="/enquire" variant="primary">
             Enquire Now
           </Button>
@@ -104,10 +113,26 @@ export default function Header() {
               </li>
             ))}
           </ul>
-          <Button to="/enquire" variant="primary" className="mt-4 w-full" onClick={() => setMenuOpen(false)}>
+          <button
+            type="button"
+            onClick={() => {
+              setMenuOpen(false)
+              setSearchOpen(true)
+            }}
+            className="flex min-h-[44px] w-full items-center gap-2 py-3 text-left text-base font-medium text-text-inverse"
+          >
+            <SearchIcon /> Search Knowledge Center
+          </button>
+          <Button to="/enquire" variant="primary" className="mt-2 w-full" onClick={() => setMenuOpen(false)}>
             Enquire Now
           </Button>
         </nav>
+      )}
+
+      {searchOpen && (
+        <Suspense fallback={null}>
+          <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
+        </Suspense>
       )}
     </header>
   )

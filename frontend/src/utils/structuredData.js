@@ -40,6 +40,25 @@ export function buildCourseSchema(course, url) {
   }
 }
 
+// Article schema — only for Knowledge Center content with a real author/
+// reviewer and publish/update date (docs/ARCHITECTURE.md §L). Never
+// applied to career/learning-path/certification pages, which aren't
+// article-shaped content.
+export function buildArticleSchema(content, url) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: content.title,
+    description: content.short_description,
+    author: { '@type': 'Person', name: content.author },
+    ...(content.reviewer ? { reviewedBy: { '@type': 'Person', name: content.reviewer } } : {}),
+    datePublished: content.publish_date,
+    dateModified: content.last_updated,
+    publisher: { '@type': 'Organization', name: 'GIIS' },
+    url,
+  }
+}
+
 export function buildOrganizationSchema(origin = typeof window !== 'undefined' ? window.location.origin : '') {
   return {
     '@context': 'https://schema.org',
