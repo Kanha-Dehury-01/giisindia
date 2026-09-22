@@ -1,0 +1,59 @@
+# ============================================================
+# GIIS India - production .htaccess (deployed to /public_html/)
+# Handles: API passthrough, dynamic sitemap, SPA fallback,
+# security headers, compression, and static asset caching.
+# See docs/ARCHITECTURE.md §B/§L.
+# ============================================================
+
+RewriteEngine On
+
+# ---- Dynamic sitemap ----
+RewriteRule ^sitemap\.xml$ api/sitemap.php [L]
+
+# ---- Never rewrite API requests: let them hit backend/api/index.php ----
+RewriteCond %{REQUEST_URI} ^/api/ [OR]
+RewriteCond %{REQUEST_URI} ^/api$
+RewriteRule ^ - [L]
+
+# ---- Serve real files and directories (JS/CSS/images/etc.) as-is ----
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# ---- Everything else (all frontend routes, including /admin/*) falls
+#      back to the React app, which handles routing client-side. Phase 9
+#      adds prerendered static HTML per indexable route ahead of this
+#      fallback, so crawlers hit real markup instead of this shell. ----
+RewriteRule ^ index.html [L]
+
+# ---- Security headers ----
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>
+
+# ---- Compression ----
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+
+# ---- Caching for static assets (hashed filenames from the Vite build) ----
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType image/png "access plus 1 month"
+  ExpiresByType image/jpeg "access plus 1 month"
+  ExpiresByType image/webp "access plus 1 month"
+  ExpiresByType image/svg+xml "access plus 1 month"
+  ExpiresByType text/html "access plus 0 seconds"
+</IfModule>
+
+# Never cache index.html itself, so deploys are picked up immediately.
+<Files "index.html">
+  <IfModule mod_headers.c>
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+  </IfModule>
+</Files>

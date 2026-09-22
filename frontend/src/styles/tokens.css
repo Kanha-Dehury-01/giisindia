@@ -1,0 +1,147 @@
+/*
+ * Design tokens — primitive → semantic → component layers.
+ * Source of truth: docs/ARCHITECTURE.md §G/H/I/J.
+ * Never hardcode a hex value or raw duration/easing in a component —
+ * reference these variables (or the Tailwind utilities generated from
+ * the @theme block below) instead.
+ */
+
+@import 'tailwindcss';
+
+:root {
+  /* ---------- Primitive tokens ---------- */
+  --navy-950: #020617;
+  --navy-900: #0f172a;
+  --navy-800: #1e293b;
+  --navy-700: #334155;
+  --navy-600: #475569;
+
+  --gold-800: #713f12;
+  --gold-700: #a16207;
+  --gold-500: #d97706;
+  --gold-400: #f2a93c;
+
+  --white: #ffffff;
+  --offwhite-50: #f8fafc;
+  --slate-200: #e2e8f0;
+  --slate-400: #94a3b8;
+  --slate-600: #475569;
+
+  --red-600: #dc2626;
+  --green-600: #16a34a;
+  --amber-500: #d97706;
+
+  /* ---------- Spacing scale (standard density, ARCHITECTURE.md §36) ---------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-8: 48px;
+  --space-10: 64px;
+  --space-12: 96px;
+
+  /* ---------- Radius ---------- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* ---------- Shadows ---------- */
+  --shadow-sm: 0 1px 2px rgba(2, 6, 23, 0.06);
+  --shadow-md: 0 4px 16px rgba(2, 6, 23, 0.08);
+  --shadow-lg: 0 12px 32px rgba(2, 6, 23, 0.12);
+
+  /* ---------- Breakpoints (reference only — Tailwind handles these) ---------- */
+  --bp-mobile: 375px;
+  --bp-tablet: 768px;
+  --bp-laptop: 1024px;
+  --bp-desktop: 1440px;
+  --bp-large-desktop: 1920px;
+
+  /* ---------- Z-index scale ---------- */
+  --z-nav: 100;
+  --z-overlay: 200;
+  --z-modal: 300;
+  --z-toast: 400;
+
+  /* ---------- Motion tokens (motion-foundations owns the runtime use of these) ---------- */
+  --motion-duration-instant: 100ms;
+  --motion-duration-fast: 180ms;
+  --motion-duration-base: 300ms;
+  --motion-duration-slow: 500ms;
+  --motion-duration-scene: 1200ms;
+  --motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
+
+  /* ---------- Semantic tokens ---------- */
+  --color-bg: var(--white);
+  --color-bg-inverse: var(--navy-900);
+  --color-surface: var(--white);
+  --color-surface-muted: var(--offwhite-50);
+  --color-surface-glass: color-mix(in srgb, var(--navy-900) 55%, transparent);
+  --color-text: var(--navy-950);
+  --color-text-muted: var(--slate-600);
+  --color-text-inverse: var(--white);
+  --color-text-inverse-muted: var(--slate-400);
+  --color-primary: var(--navy-900);
+  --color-accent: var(--gold-700);
+  --color-accent-on-dark: var(--gold-400);
+  --color-border: var(--slate-200);
+  --color-border-inverse: color-mix(in srgb, var(--white) 15%, transparent);
+  --color-focus-ring: var(--gold-500);
+  --color-danger: var(--red-600);
+  --color-success: var(--green-600);
+
+  /* ---------- Component tokens ---------- */
+  --button-primary-bg: var(--color-accent);
+  --button-primary-text: var(--navy-950);
+  --button-primary-bg-hover: var(--gold-500);
+  --card-bg: var(--color-surface);
+  --card-border: var(--color-border);
+  --card-radius: var(--radius-lg);
+  --nav-bg-scrolled: color-mix(in srgb, var(--navy-900) 92%, transparent);
+
+  /* ---------- Typography ---------- */
+  --font-display: 'Lexend', system-ui, sans-serif;
+  --font-body: 'Source Sans 3', system-ui, sans-serif;
+}
+
+/* Tailwind v4 CSS-first theme: semantic tokens become utilities
+   (bg-primary, text-accent, etc.) — never bg-[var(--color-primary)]. */
+@theme {
+  --color-bg: var(--color-bg);
+  --color-bg-inverse: var(--color-bg-inverse);
+  --color-surface: var(--color-surface);
+  --color-surface-muted: var(--color-surface-muted);
+  --color-text: var(--color-text);
+  --color-text-muted: var(--color-text-muted);
+  --color-text-inverse: var(--color-text-inverse);
+  --color-text-inverse-muted: var(--color-text-inverse-muted);
+  --color-primary: var(--color-primary);
+  --color-accent: var(--color-accent);
+  --color-accent-on-dark: var(--color-accent-on-dark);
+  --color-border: var(--color-border);
+  --color-focus-ring: var(--color-focus-ring);
+  --color-danger: var(--color-danger);
+  --color-success: var(--color-success);
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-full: var(--radius-full);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+
+  --breakpoint-mobile: 375px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-laptop: 1024px;
+  --breakpoint-desktop: 1440px;
+  --breakpoint-large: 1920px;
+}
