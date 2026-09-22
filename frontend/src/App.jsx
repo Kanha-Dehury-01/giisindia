@@ -29,6 +29,7 @@ const NotFound = lazy(() => import('./pages/NotFound'))
 const KnowledgeCenter = lazy(() => import('./pages/knowledge-center/KnowledgeCenter'))
 const KnowledgeSearch = lazy(() => import('./pages/knowledge-center/KnowledgeSearch'))
 const ArticleDetail = lazy(() => import('./pages/knowledge-center/ArticleDetail'))
+const CareerPaths = lazy(() => import('./pages/knowledge-center/CareerPaths'))
 const CareerPathDetail = lazy(() => import('./pages/knowledge-center/CareerPathDetail'))
 const LearningPaths = lazy(() => import('./pages/knowledge-center/LearningPaths'))
 const LearningPathDetail = lazy(() => import('./pages/knowledge-center/LearningPathDetail'))
@@ -66,6 +67,7 @@ export default function App() {
             <Route path="technologies/:slug" element={<ArticleDetail contentType="technology" />} />
             <Route path="guides/:slug" element={<ArticleDetail contentType="guide" />} />
             <Route path="resources/:slug" element={<ArticleDetail contentType="resource" />} />
+            <Route path="careers" element={<CareerPaths />} />
             <Route path="careers/:slug" element={<CareerPathDetail />} />
             <Route path="learning-paths" element={<LearningPaths />} />
             <Route path="learning-paths/:slug" element={<LearningPathDetail />} />

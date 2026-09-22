@@ -38,7 +38,7 @@ export const FOOTER_COLUMNS = [
     heading: 'Knowledge Center',
     links: [
       { label: 'Fundamentals', to: '/knowledge-center?type=fundamental' },
-      { label: 'Career Paths', to: '/knowledge-center/learning-paths' },
+      { label: 'Career Paths', to: '/knowledge-center/careers' },
       { label: 'Learning Paths', to: '/knowledge-center/learning-paths' },
       { label: 'Glossary', to: '/knowledge-center/glossary' },
     ],

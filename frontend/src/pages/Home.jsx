@@ -1,26 +1,56 @@
 import { useSeo } from '../hooks/useSeo'
+import HeroSlider from '../components/sections/hero/HeroSlider'
+import TrustStrip from '../components/sections/TrustStrip'
+import Introduction from '../components/sections/Introduction'
+import NumbersStats from '../components/sections/NumbersStats'
+import WhyGiisSection from '../components/sections/WhyGiisSection'
+import TopCourses from '../components/sections/TopCourses'
+import CoursesByCategory from '../components/sections/CoursesByCategory'
+import LearningExperience from '../components/sections/LearningExperience'
+import PracticalLabs from '../components/sections/PracticalLabs'
+import IndustryEcosystem from '../components/sections/IndustryEcosystem'
+import CertificationsShowcase from '../components/sections/CertificationsShowcase'
+import TestimonialCarousel from '../components/sections/TestimonialCarousel'
+import CareerPathwaysPreview from '../components/sections/CareerPathwaysPreview'
+import LeadershipPreview from '../components/sections/LeadershipPreview'
+import KnowledgeCenterPreview from '../components/sections/KnowledgeCenterPreview'
+import EventsResourcesPreview from '../components/sections/EventsResourcesPreview'
+import FaqSection from '../components/sections/FaqSection'
+import FinalCta from '../components/sections/FinalCta'
 
-// Full 20-section homepage (docs/ARCHITECTURE.md §A, spec §8) is Phase 3.
-// This stub exists so routing/layout/navigation can be verified end-to-end
-// in Phase 2 before any section design lands.
+// The 20-section order below matches docs/ARCHITECTURE.md §A / spec §8
+// exactly. Each section is independently composed (not a single monolithic
+// fetch), so a slow/missing section never blocks the rest of the page
+// (docs/ARCHITECTURE.md §K). All content is placeholder-marked pending
+// Phase 8's real API — every section already accepts the real data shape
+// as a prop, so wiring the API in is additive, not a rewrite.
 export default function Home() {
   useSeo({
     title: 'GIIS India | Cybersecurity Education & Professional Training',
     description:
-      'GIIS is the educational wing of Threatsys, offering industry-aligned, certification-focused cybersecurity training.',
+      'GIIS is the educational wing of Threatsys, offering industry-aligned, certification-focused cybersecurity training — ethical hacking, SOC analysis, penetration testing, cloud security, GRC, and leadership programs.',
   })
 
   return (
-    <div className="bg-bg-inverse py-24 text-center text-text-inverse md:py-40">
-      <div className="container">
-        <p className="font-display text-sm font-semibold tracking-wide text-accent-on-dark uppercase">
-          Cybersecurity Education
-        </p>
-        <h1 className="mx-auto mt-4 max-w-3xl text-text-inverse">Build the skills to defend the digital world.</h1>
-        <p className="mx-auto mt-4 max-w-xl text-text-inverse-muted">
-          Homepage hero, statistics, course discovery, Knowledge Center, and career pathways land in Phase 3.
-        </p>
-      </div>
+    <div>
+      <HeroSlider />
+      <TrustStrip />
+      <Introduction />
+      <NumbersStats />
+      <WhyGiisSection />
+      <TopCourses />
+      <CoursesByCategory />
+      <LearningExperience />
+      <PracticalLabs />
+      <IndustryEcosystem />
+      <CertificationsShowcase />
+      <TestimonialCarousel />
+      <CareerPathwaysPreview />
+      <LeadershipPreview />
+      <KnowledgeCenterPreview />
+      <EventsResourcesPreview />
+      <FaqSection />
+      <FinalCta />
     </div>
   )
 }
