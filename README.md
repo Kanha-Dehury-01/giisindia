@@ -10,11 +10,12 @@ This repo is being built in phases (tracked in `docs/ARCHITECTURE.md` §N). As o
 |---|---|
 | 1 — Architecture + database schema + design tokens | ✅ Done (`docs/ARCHITECTURE.md`, `database/schema.sql`) |
 | 2 — Frontend shell (Vite/React/Tailwind scaffold, full route tree, layout) | ✅ Done (`frontend/`) |
-| 3–6 — Homepage, courses, Knowledge Center, career/learning paths | ⏳ Not yet started (pages exist as stubs — see below) |
+| 3 — Homepage (all 20 sections, motion system, three-slide hero) | ✅ Done |
+| 4–6 — Courses, Knowledge Center, career/learning paths | ⏳ Not yet started (pages exist as stubs — see below) |
 | 7–8 — Admin CMS, PHP API | ⏳ Not yet started (`/admin/login` shell exists; no backend to authenticate against yet) |
 | 9–14 — SEO, security, responsive, performance, testing, deployment | ⏳ Not yet started |
 
-**What you can actually run locally today:** the database schema (step 3.3), and the frontend dev server (step 3.6) — every route in the sitemap resolves and renders (as a placeholder page for anything past Phase 2), navigation/footer/mobile menu/breadcrumbs all work, and `npm run build` produces a real production bundle. The `backend/` folder referenced in step 3.5/3.7 doesn't exist yet — it lands in Phase 8, so pages that need real data (courses, Knowledge Center content, login) show placeholder content or a failed API call rather than real results until then.
+**What you can actually run locally today:** the database schema (step 3.3), and the frontend dev server (step 3.6) — every route in the sitemap resolves and renders (a full designed page for the homepage; a placeholder page for anything past Phase 3), navigation/footer/mobile menu/breadcrumbs all work, and `npm run build` produces a real production bundle. The homepage's course/career/testimonial/team/FAQ content is placeholder data shaped exactly like the matching database table — real content replaces it in Phase 8 with no component changes needed. The `backend/` folder referenced in step 3.5/3.7 doesn't exist yet — it lands in Phase 8, so pages that need real data (courses, Knowledge Center content, login) show placeholder content or a failed API call rather than real results until then.
 
 ## 1. Technology Stack
 
