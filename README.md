@@ -13,11 +13,11 @@ This repo is being built in phases (tracked in `docs/ARCHITECTURE.md` §N). As o
 | 3 — Homepage (all 20 sections, motion system, three-slide hero) | ✅ Done |
 | 4 — Course catalogue (search/filter/sort/pagination) + detail pages | ✅ Done |
 | 5 — Knowledge Center hub, real search, article template | ✅ Done |
-| 6 — Career paths, learning paths, certification explorer, glossary | ⏳ Not yet started (pages exist as stubs — see below) |
+| 6 — Career paths, learning paths, certification explorer, glossary | ✅ Done |
 | 7–8 — Admin CMS, PHP API | ⏳ Not yet started (`/admin/login` shell exists; no backend to authenticate against yet) |
 | 9–14 — SEO, security, responsive, performance, testing, deployment | ⏳ Not yet started |
 
-**What you can actually run locally today:** the database schema (step 3.3), and the frontend dev server (step 3.6) — every route in the sitemap resolves and renders (a full designed page for the homepage; a placeholder page for anything past Phase 3), navigation/footer/mobile menu/breadcrumbs all work, and `npm run build` produces a real production bundle. The homepage's course/career/testimonial/team/FAQ content is placeholder data shaped exactly like the matching database table — real content replaces it in Phase 8 with no component changes needed. The `backend/` folder referenced in step 3.5/3.7 doesn't exist yet — it lands in Phase 8, so pages that need real data (courses, Knowledge Center content, login) show placeholder content or a failed API call rather than real results until then.
+**What you can actually run locally today:** the database schema (step 3.3), and the frontend dev server (step 3.6) — the entire public-facing site is real and interactive: homepage, course catalogue with working search/filters/pagination and detail pages, the Knowledge Center hub with real cross-content search (courses/careers/certifications/learning paths/guides/glossary, ranked and category-tabbed) plus a global quick-search overlay, career path and learning path pages with visual roadmaps, the certification explorer, and the A-Z glossary. All of it runs on placeholder data shaped exactly like the matching database table, so Phase 8's real API swap-in is additive, not a rewrite. Only `/admin/*` and anything requiring the PHP backend (login, form submission, real content) aren't functional yet — that's Phase 7/8.
 
 ## 1. Technology Stack
 
