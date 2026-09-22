@@ -9,12 +9,12 @@ This repo is being built in phases (tracked in `docs/ARCHITECTURE.md` §N). As o
 | Phase | Status |
 |---|---|
 | 1 — Architecture + database schema + design tokens | ✅ Done (`docs/ARCHITECTURE.md`, `database/schema.sql`) |
-| 2 — Frontend shell (Vite/React scaffold) | ⏳ Not yet started |
-| 3–6 — Homepage, courses, Knowledge Center, career/learning paths | ⏳ Not yet started |
-| 7–8 — Admin CMS, PHP API | ⏳ Not yet started |
+| 2 — Frontend shell (Vite/React/Tailwind scaffold, full route tree, layout) | ✅ Done (`frontend/`) |
+| 3–6 — Homepage, courses, Knowledge Center, career/learning paths | ⏳ Not yet started (pages exist as stubs — see below) |
+| 7–8 — Admin CMS, PHP API | ⏳ Not yet started (`/admin/login` shell exists; no backend to authenticate against yet) |
 | 9–14 — SEO, security, responsive, performance, testing, deployment | ⏳ Not yet started |
 
-**What you can actually run locally today:** the database schema (step 1 below). The `frontend/` and `backend/` folders referenced in step 2–3 don't exist yet — they land in Phase 2 and Phase 8. This README documents the full local setup process now, written against the final architecture, so it doesn't need rewriting as each phase lands — steps 2–3 will simply start working once that code exists. Skip to "What works today" at the bottom if you just want to verify the current state.
+**What you can actually run locally today:** the database schema (step 3.3), and the frontend dev server (step 3.6) — every route in the sitemap resolves and renders (as a placeholder page for anything past Phase 2), navigation/footer/mobile menu/breadcrumbs all work, and `npm run build` produces a real production bundle. The `backend/` folder referenced in step 3.5/3.7 doesn't exist yet — it lands in Phase 8, so pages that need real data (courses, Knowledge Center content, login) show placeholder content or a failed API call rather than real results until then.
 
 ## 1. Technology Stack
 
@@ -94,7 +94,7 @@ http://localhost/giisindia-api/api/...
 
 `backend/api/.htaccess` handles the routing — all requests to `/api/*` go through `backend/api/index.php`.
 
-### 3.6 Run the frontend dev server (once Phase 2 lands)
+### 3.6 Run the frontend dev server
 
 ```bash
 cd frontend
@@ -102,25 +102,28 @@ npm install
 npm run dev
 ```
 
-This starts Vite's dev server, typically at `http://localhost:5173`. The frontend reads `API_URL` from its own `.env` (or a Vite proxy config) to talk to the PHP API — see `frontend/README.md` once it exists for exact config.
+This starts Vite's dev server at `http://localhost:5173`. You should see the GIIS shell — sticky header, mobile nav drawer below `lg` width, footer, and every route from `docs/ARCHITECTURE.md` §A resolving to a page (a placeholder page, until its content phase lands). `/api/*` requests are proxied to `http://127.0.0.1` (see `vite.config.js`) so they'll reach a backend once Phase 8 exists; until then, anything that calls the API (like `/admin/login`) will fail the request rather than break the page.
+
+To produce a production build: `npm run build` (outputs to `frontend/dist/`, ready to deploy as static files per `frontend/public/.htaccess`).
 
 ### 3.7 Log in to the admin panel
 
 Once Phase 8's seed data is in place, the admin panel will be reachable at `http://localhost:5173/admin/login` in dev (or `/admin/login` on the built site) with a placeholder Super Admin account documented in `database/seed.sql`'s comments at that time. **Change the placeholder password immediately** — it is never a real credential committed to source control.
 
-## 4. What works today (before Phase 2/8 land)
+## 4. What works today (before Phase 8 lands)
 
 Right now you can:
 1. Follow steps 3.1–3.4 to stand up the database and inspect the schema (via phpMyAdmin, or any MySQL client) — every table from `docs/ARCHITECTURE.md` §E should be present.
-2. Read `docs/ARCHITECTURE.md` for the full sitemap, API surface, design tokens, and security/SEO architecture that the rest of the build follows.
+2. Follow step 3.6 to run the frontend and click through the entire site's navigation, mobile menu, and every route — content is placeholder, but the shell, layout, accessibility (skip link, focus states, keyboard nav), and design tokens are real.
+3. Read `docs/ARCHITECTURE.md` for the full sitemap, API surface, design tokens, and security/SEO architecture that the rest of the build follows.
 
-Steps 3.5–3.7 will become real once their phases are implemented — this file will be updated in place (not rewritten) as each phase's actual folder structure/commands are confirmed to match what's documented here.
+Steps 3.5 and 3.7 will become real once Phase 8 lands — this file will be updated in place (not rewritten) as that phase's actual endpoints/commands are confirmed to match what's documented here.
 
 ## 5. Project structure (planned — see `docs/ARCHITECTURE.md` §C/§D for full detail)
 
 ```
 giisindia/
-├── frontend/               React + Vite app (Phase 2+)
+├── frontend/               ✅ React + Vite + Tailwind app, full route tree (Phase 2)
 ├── backend/                PHP API (Phase 8)
 ├── database/
 │   ├── schema.sql           ✅ full fresh-install schema (this exists now)
