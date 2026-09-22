@@ -20,6 +20,8 @@
   --gold-700: #a16207;
   --gold-500: #d97706;
   --gold-400: #f2a93c;
+  --gold-300: #fbbf5c;   /* brighter — dark-surface accents/glows only, not body text (fails AA on white) */
+  --gold-200: #ffdd9e;   /* brightest — small highlights/glow cores only */
 
   --white: #ffffff;
   --offwhite-50: #f8fafc;

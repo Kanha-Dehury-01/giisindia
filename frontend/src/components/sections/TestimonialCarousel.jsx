@@ -13,8 +13,11 @@ export default function TestimonialCarousel({ testimonials = PLACEHOLDER_TESTIMO
   const t = testimonials[index]
 
   return (
-    <section className="bg-surface-muted py-16 md:py-24">
-      <div className="container max-w-2xl text-center">
+    <section className="relative overflow-hidden py-16 md:py-24">
+      <span aria-hidden="true" className="pointer-events-none absolute -top-6 left-1/2 -translate-x-1/2 font-display text-[10rem] leading-none text-accent/10 select-none">
+        &rdquo;
+      </span>
+      <div className="container relative max-w-2xl text-center">
         <RevealOnScroll>
           <p className="font-display text-sm font-semibold text-accent uppercase">Student Testimonials</p>
         </RevealOnScroll>

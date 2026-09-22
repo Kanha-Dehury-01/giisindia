@@ -2,7 +2,7 @@ import RevealOnScroll from '../motion/RevealOnScroll'
 
 export default function IndustryEcosystem() {
   return (
-    <section className="py-16 md:py-24">
+    <section className="section-grid-light py-16 md:py-24">
       <div className="container text-center">
         <RevealOnScroll>
           <p className="font-display text-sm font-semibold text-accent uppercase">GIIS &times; Threatsys</p>

@@ -12,7 +12,7 @@ export const HERO_SLIDES = [
     description: 'Industry-aligned cybersecurity training from GIIS, the educational wing of Threatsys.',
     cta_label: 'Explore Courses',
     cta_url: '/courses',
-    svg_asset_key: 'network_shield',
+    svg_asset_key: 'radar_defense',
   },
   {
     id: 2,

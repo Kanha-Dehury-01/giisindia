@@ -133,4 +133,23 @@
       padding-inline: var(--space-6);
     }
   }
+
+  /*
+   * Subtle technical-grid texture (spec §6: "Technical grid, fine-line
+   * network patterns"), used sparingly on a few light sections to give
+   * them their own identity beyond a flat background-color swap — never
+   * on every section, and never so strong it competes with content. The
+   * dot color is pre-faded via color-mix so this is a single flat
+   * background-image, not a layered pseudo-element.
+   */
+  .section-grid-light {
+    background-color: var(--color-surface);
+    background-image: radial-gradient(circle, color-mix(in srgb, var(--navy-900) 8%, transparent) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  .section-grid-dark {
+    background-image: radial-gradient(circle, color-mix(in srgb, var(--gold-300) 12%, transparent) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
 }

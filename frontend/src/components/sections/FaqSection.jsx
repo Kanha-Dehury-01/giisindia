@@ -9,7 +9,7 @@ import { PLACEHOLDER_FAQS } from '../../data/faqsPlaceholder'
 // it's a partial view of a larger list.
 export default function FaqSection({ faqs = PLACEHOLDER_FAQS.slice(0, 5) }) {
   return (
-    <section className="py-16 md:py-24">
+    <section className="bg-surface-muted py-16 md:py-24">
       <div className="container max-w-3xl">
         <RevealOnScroll>
           <p className="font-display text-sm font-semibold text-accent uppercase">FAQ</p>

@@ -9,7 +9,7 @@ const FEATURES = [
 
 export default function LearningExperience() {
   return (
-    <section className="py-16 md:py-24">
+    <section className="section-grid-light py-16 md:py-24">
       <div className="container">
         <RevealOnScroll>
           <p className="font-display text-sm font-semibold text-accent uppercase">Learning Experience</p>

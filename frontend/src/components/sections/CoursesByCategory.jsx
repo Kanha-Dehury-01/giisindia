@@ -17,7 +17,7 @@ export default function CoursesByCategory({ courses = PLACEHOLDER_COURSES }) {
   const categories = groupByCategory(courses)
 
   return (
-    <section className="py-16 md:py-24">
+    <section className="bg-surface-muted py-16 md:py-24">
       <div className="container">
         <RevealOnScroll>
           <p className="font-display text-sm font-semibold text-accent uppercase">Course Catalogue</p>

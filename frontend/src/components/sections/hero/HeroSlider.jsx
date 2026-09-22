@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import Button from '../../ui/Button'
 import TextReveal from '../../motion/TextReveal'
 import ParallaxLayer from '../../motion/ParallaxLayer'
-import SceneNetworkShield from '../../motion/hero-scenes/SceneNetworkShield'
+import SceneRadarDefense from '../../motion/hero-scenes/SceneRadarDefense'
 import SceneStudentTerminal from '../../motion/hero-scenes/SceneStudentTerminal'
 import SceneCareerJourney from '../../motion/hero-scenes/SceneCareerJourney'
 import { motionTokens } from '../../../lib/motion-tokens'
@@ -11,7 +11,7 @@ import { useReducedMotion } from '../../../context/ReducedMotionContext'
 import { HERO_SLIDES } from './heroSlidesData'
 
 const SCENES = {
-  network_shield: SceneNetworkShield,
+  radar_defense: SceneRadarDefense,
   student_terminal: SceneStudentTerminal,
   learn_certify_career: SceneCareerJourney,
 }

@@ -367,7 +367,7 @@ CREATE TABLE hero_slides (
   description    VARCHAR(500) NULL,
   cta_label      VARCHAR(100) NULL,
   cta_url        VARCHAR(300) NULL,
-  svg_asset_key  ENUM('network_shield','student_terminal','learn_certify_career') NOT NULL,
+  svg_asset_key  ENUM('radar_defense','student_terminal','learn_certify_career') NOT NULL,
   publish_status ENUM('draft','published') NOT NULL DEFAULT 'draft'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

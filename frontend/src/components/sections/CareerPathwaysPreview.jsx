@@ -6,7 +6,7 @@ import { PLACEHOLDER_CAREERS } from '../../data/careersPlaceholder'
 
 export default function CareerPathwaysPreview({ careers = PLACEHOLDER_CAREERS.slice(0, 8) }) {
   return (
-    <section className="py-16 md:py-24">
+    <section className="bg-surface-muted py-16 md:py-24">
       <div className="container">
         <RevealOnScroll>
           <p className="font-display text-sm font-semibold text-accent uppercase">Career & Placement</p>

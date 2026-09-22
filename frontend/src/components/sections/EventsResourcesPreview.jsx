@@ -10,7 +10,7 @@ const PLACEHOLDER_ITEMS = [
 
 export default function EventsResourcesPreview({ items = PLACEHOLDER_ITEMS }) {
   return (
-    <section className="bg-surface-muted py-16 md:py-24">
+    <section className="py-16 md:py-24">
       <div className="container">
         <RevealOnScroll>
           <div className="flex flex-wrap items-end justify-between gap-4">

@@ -4,9 +4,13 @@ import { FOOTER_COLUMNS } from '../../utils/navigation'
 // Contact details / social links come from `site_settings` via the API
 // once Phase 8 lands — placeholders here are clearly marked, not fabricated
 // (docs/ARCHITECTURE.md §O).
+//
+// Background is deliberately --navy-950 (deeper than FinalCta's
+// --navy-900/--color-bg-inverse), with a hairline top border, so the
+// footer doesn't visually merge into the dark CTA section above it.
 export default function Footer() {
   return (
-    <footer className="bg-bg-inverse text-text-inverse-muted">
+    <footer className="border-t border-border-inverse bg-[var(--navy-950)] text-text-inverse-muted">
       <div className="container grid grid-cols-2 gap-8 py-12 md:grid-cols-3 lg:grid-cols-6 lg:py-16">
         <div className="col-span-2 lg:col-span-1">
           <p className="font-display text-lg font-bold text-text-inverse">
