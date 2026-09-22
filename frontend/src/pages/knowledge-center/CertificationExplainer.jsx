@@ -1,22 +1,11 @@
-import { useParams } from 'react-router-dom'
-import StubPage from '../../components/ui/StubPage'
+import { Navigate, useParams } from 'react-router-dom'
 
-// Knowledge-side certification explainer (spec §17/§22) — distinct from
-// the marketing-facing /certifications/[slug] page; this one lives in the
-// Knowledge Center's internal-linking graph and links out to that page.
+// Redirects to the authoritative /certifications/[slug] page rather than
+// duplicating its content under a second URL — two near-identical pages
+// for the same certification would be a real duplicate-content SEO
+// problem (spec §32) for no real benefit, since /certifications/[slug]
+// already carries the Knowledge Center's related-content links back in.
 export default function CertificationExplainer() {
   const { slug } = useParams()
-
-  return (
-    <StubPage
-      eyebrow="Certification"
-      title={slug}
-      breadcrumbs={[
-        { label: 'Home', to: '/' },
-        { label: 'Knowledge Center', to: '/knowledge-center' },
-        { label: slug },
-      ]}
-      phaseNote="Phase 6, driven by /api/certifications/{slug}."
-    />
-  )
+  return <Navigate to={`/certifications/${slug}`} replace />
 }
