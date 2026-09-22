@@ -12,7 +12,8 @@ This repo is being built in phases (tracked in `docs/ARCHITECTURE.md` §N). As o
 | 2 — Frontend shell (Vite/React/Tailwind scaffold, full route tree, layout) | ✅ Done (`frontend/`) |
 | 3 — Homepage (all 20 sections, motion system, three-slide hero) | ✅ Done |
 | 4 — Course catalogue (search/filter/sort/pagination) + detail pages | ✅ Done |
-| 5–6 — Knowledge Center, career/learning paths, certifications, glossary | ⏳ Not yet started (pages exist as stubs — see below) |
+| 5 — Knowledge Center hub, real search, article template | ✅ Done |
+| 6 — Career paths, learning paths, certification explorer, glossary | ⏳ Not yet started (pages exist as stubs — see below) |
 | 7–8 — Admin CMS, PHP API | ⏳ Not yet started (`/admin/login` shell exists; no backend to authenticate against yet) |
 | 9–14 — SEO, security, responsive, performance, testing, deployment | ⏳ Not yet started |
 
