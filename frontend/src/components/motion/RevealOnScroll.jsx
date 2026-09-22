@@ -8,13 +8,17 @@ import { useReducedMotion } from '../../context/ReducedMotionContext'
  * its content in this rather than each rolling its own whileInView call
  * (motion-patterns rule 7/8: once:true, tokens only).
  */
-export default function RevealOnScroll({ children, as = 'div', distance = motionTokens.distance.lg, delay = 0, className }) {
+export default function RevealOnScroll({ children, as = 'div', distance = motionTokens.distance.lg, delay = 0, className, ...rest }) {
   const reduced = useReducedMotion()
   const Component = motion[as] ?? motion.div
 
   if (reduced) {
     const Static = as
-    return <Static className={className}>{children}</Static>
+    return (
+      <Static className={className} {...rest}>
+        {children}
+      </Static>
+    )
   }
 
   return (
@@ -24,6 +28,7 @@ export default function RevealOnScroll({ children, as = 'div', distance = motion
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-80px' }}
       transition={{ duration: motionTokens.duration.slow, ease: motionTokens.easing.smooth, delay }}
+      {...rest}
     >
       {children}
     </Component>
