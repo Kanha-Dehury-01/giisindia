@@ -12,8 +12,10 @@ backend/.phpunit.result.cache
 backend/api/uploads/*
 !backend/api/uploads/.gitkeep
 
-# Rate-limiter state (file-based, regenerates automatically)
-backend/storage/
+# Rate-limiter state (file-based, regenerates automatically) — but keep
+# the protective .htaccess that denies direct web access to this folder
+backend/storage/*
+!backend/storage/.htaccess
 
 # OS / editor
 .DS_Store

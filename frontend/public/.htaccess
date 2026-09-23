@@ -43,6 +43,13 @@ RewriteRule ^ index.html [L]
   Header set Referrer-Policy "strict-origin-when-cross-origin"
   Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
   Header set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+  # This file only ever gets deployed to production (local dev uses the
+  # Vite dev server, never Apache/.htaccess — see the file header above),
+  # so it's safe to set this unconditionally, unlike the APP_ENV-gated
+  # version in backend/api/index.php. Requires HTTPS to already be live
+  # (docs/DEPLOYMENT.md §7) — a browser ignores this header entirely over
+  # plain HTTP, so setting it can't itself lock you out.
+  Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
 </IfModule>
 
 # ---- Compression ----

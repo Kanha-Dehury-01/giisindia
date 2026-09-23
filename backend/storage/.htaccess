@@ -1,0 +1,3 @@
+# Rate-limiter state and any future cache files — never web-servable.
+# See docs/DEPLOYMENT.md.
+Require all denied

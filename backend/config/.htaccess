@@ -1,0 +1,5 @@
+# Never web-servable directly — only reachable via PHP require() from
+# api/index.php. Defense in depth alongside the deployment layout itself
+# (see docs/DEPLOYMENT.md): even if this folder ends up under the web
+# root, Apache refuses to serve anything inside it.
+Require all denied

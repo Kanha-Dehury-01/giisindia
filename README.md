@@ -21,7 +21,9 @@ This repo is being built in phases (tracked in `docs/ARCHITECTURE.md` §N). As o
 | 11 — Responsive optimization (verified across 172 page×viewport combos) | ✅ Done (`frontend/src/layouts/AdminLayout.jsx`) |
 | 12 — Performance (vendor chunk splitting, search query pre-filtering) | ✅ Done (`frontend/vite.config.js`, `backend/api/handlers/knowledge.php`) |
 | 13 — Testing (PHPUnit: 34 tests; Playwright e2e: 50 tests) | ✅ Done (`backend/tests/`, `frontend/e2e/`) |
-| 14 — cPanel deployment documentation | ⏳ Not yet started |
+| 14 — cPanel deployment documentation | ✅ Done (`docs/DEPLOYMENT.md`) |
+
+**All 14 phases are done.** Before you read this as "ready to launch," read the one caveat that matters: see **§11 of `docs/DEPLOYMENT.md`** — the public-facing site (Phases 2–6) still renders from placeholder data modules, not the live database the admin CMS (Phase 7) and API (Phase 8) actually write to. Everything else — the real backend, the real admin CMS, SEO infrastructure, security hardening, verified responsiveness, performance work, and a real automated test suite — is genuinely built and tested, not stubbed.
 
 **What you can actually run locally today:** the full database — schema *and* seed data (step 3.3) — a real, tested PHP REST API (step 3.5), the frontend dev server (step 3.6), and now a fully working **admin CMS** at `/admin` (step 3.7) that manages that same real data. The backend is genuine: 60+ endpoints across courses, the Knowledge Center + cross-content search, careers, learning paths, certifications, glossary, testimonials, team, FAQs, events, resources, and public enquiry submission, plus a fully RBAC-enforced `/admin/*` surface (session auth, CSRF via double-submit cookie, per-permission checks on every write, file-based auth/enquiry rate limiting, an audit log, and media upload with real MIME-sniffing and SVG script-injection rejection) — all backed by live MySQL/MariaDB, not mocks or in-memory fixtures.
 
@@ -198,10 +200,11 @@ giisindia/
 │                              validation), api/handlers/ (~20 files), api/index.php (router)
 ├── database/
 │   ├── schema.sql           ✅ full fresh-install schema (37 tables)
-│   ├── seed.sql              ✅ real course/career/certification/etc. content + admin user
+│   ├── seed.sql              ✅ real course/career/certification/etc. content + admin/editor users
 │   └── migrations/           incremental migrations, once schema changes post-launch
 ├── docs/
-│   └── ARCHITECTURE.md      ✅ sitemap, system/frontend/backend/CMS/SEO/security architecture
+│   ├── ARCHITECTURE.md      ✅ sitemap, system/frontend/backend/CMS/SEO/security architecture
+│   └── DEPLOYMENT.md        ✅ cPanel deployment guide (Phase 14) — layout, .env, HTTPS, verification checklist
 ├── .env.example             ✅ environment variable template
 └── README.md                this file
 ```
