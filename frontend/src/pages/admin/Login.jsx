@@ -18,7 +18,7 @@ export default function Login() {
     setSubmitting(true)
     setError(null)
     try {
-      const user = await login(username, password)
+      const { user } = await login(username, password)
       setUser(user)
       navigate('/admin', { replace: true })
     } catch (err) {

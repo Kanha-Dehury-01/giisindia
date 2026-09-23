@@ -131,10 +131,27 @@ final class CrudResource
         return $candidate;
     }
 
+    /**
+     * PDO with native (non-emulated) prepares can bind a PHP bool as an
+     * empty string rather than 0/1, which MySQL's strict mode then
+     * rejects for a TINYINT column ("Incorrect integer value: ''"). Every
+     * write goes through this so admin forms can send real booleans
+     * (checkboxes) without each handler having to know about the quirk.
+     */
+    private function normalize(array $data): array
+    {
+        foreach ($data as $key => $value) {
+            if (is_bool($value)) {
+                $data[$key] = $value ? 1 : 0;
+            }
+        }
+        return $data;
+    }
+
     /** Inserts a row from $input, restricted to the configured allowlist. Returns the new row. */
     public function create(array $input): array
     {
-        $data = only($input, $this->allowedFields);
+        $data = $this->normalize(only($input, $this->allowedFields));
 
         if ($this->slugField && empty($data[$this->slugField]) && !empty($input['title'] ?? $input['name'] ?? null)) {
             $data[$this->slugField] = $this->uniqueSlug((string) ($input['title'] ?? $input['name']));
@@ -157,7 +174,7 @@ final class CrudResource
     /** Updates a row, restricted to the configured allowlist. Returns the updated row or null if not found. */
     public function update(int $id, array $input): ?array
     {
-        $data = only($input, $this->allowedFields);
+        $data = $this->normalize(only($input, $this->allowedFields));
         if (empty($data)) {
             return $this->find($id);
         }

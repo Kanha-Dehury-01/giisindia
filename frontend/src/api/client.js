@@ -7,11 +7,12 @@
 const BASE_URL = '/api'
 
 export class ApiError extends Error {
-  constructor(message, code, status) {
+  constructor(message, code, status, fields) {
     super(message)
     this.name = 'ApiError'
     this.code = code
     this.status = status
+    this.fields = fields ?? null
   }
 }
 
@@ -19,7 +20,7 @@ function getCsrfToken() {
   return document.cookie.match(/(?:^|; )csrf_token=([^;]*)/)?.[1] ?? null
 }
 
-export async function apiRequest(path, { method = 'GET', body, params } = {}) {
+async function performRequest(path, { method = 'GET', body, params } = {}) {
   const url = new URL(BASE_URL + path, window.location.origin)
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
@@ -53,14 +54,27 @@ export async function apiRequest(path, { method = 'GET', body, params } = {}) {
       payload?.error?.message ?? 'Request failed',
       payload?.error?.code ?? 'unknown_error',
       response.status,
+      payload?.error?.fields,
     )
   }
 
+  return payload
+}
+
+export async function apiRequest(path, options) {
+  const payload = await performRequest(path, options)
   return payload.data
+}
+
+/** Same as apiRequest, but resolves { data, meta } — for paginated admin list endpoints that need meta.total_pages. */
+export async function apiRequestWithMeta(path, options) {
+  const payload = await performRequest(path, options)
+  return { data: payload.data, meta: payload.meta }
 }
 
 export const apiClient = {
   get: (path, params) => apiRequest(path, { method: 'GET', params }),
+  getPaginated: (path, params) => apiRequestWithMeta(path, { method: 'GET', params }),
   post: (path, body) => apiRequest(path, { method: 'POST', body }),
   put: (path, body) => apiRequest(path, { method: 'PUT', body }),
   delete: (path) => apiRequest(path, { method: 'DELETE' }),

@@ -55,7 +55,7 @@ function admin_knowledge_create(array $params): void
     }
 
     $entry = knowledge_resource()->create($body);
-    knowledge_sync_tags((int) $entry['id'], $body['tag_ids'] ?? null);
+    knowledge_sync_tags((int) $entry['id'], $body['tags'] ?? null);
 
     write_audit_log((int) $user['id'], 'knowledge.create', 'knowledge_content', $entry['id']);
     json_success($entry);
@@ -71,8 +71,8 @@ function admin_knowledge_update(array $params): void
     if (!$updated) {
         json_error('not_found', 'Content not found.', 404);
     }
-    if (array_key_exists('tag_ids', $body)) {
-        knowledge_sync_tags($id, $body['tag_ids']);
+    if (array_key_exists('tags', $body)) {
+        knowledge_sync_tags($id, $body['tags']);
     }
 
     write_audit_log((int) $user['id'], 'knowledge.update', 'knowledge_content', $id);
@@ -92,18 +92,44 @@ function admin_knowledge_delete(array $params): void
     json_success(['deleted' => true]);
 }
 
-function knowledge_sync_tags(int $knowledgeId, ?array $tagIds): void
+/**
+ * Accepts plain tag NAMES (not IDs) — a non-technical editor types
+ * "pentest, career" rather than looking up numeric tag IDs. Each name is
+ * found-or-created by its slug, then linked.
+ */
+function knowledge_sync_tags(int $knowledgeId, ?array $tagNames): void
 {
-    if ($tagIds === null) {
+    if ($tagNames === null) {
         return;
     }
     $pdo = db();
     $pdo->prepare('DELETE FROM knowledge_content_tags WHERE knowledge_content_id = ?')->execute([$knowledgeId]);
-    if (!$tagIds) {
+    if (!$tagNames) {
         return;
     }
-    $stmt = $pdo->prepare('INSERT IGNORE INTO knowledge_content_tags (knowledge_content_id, tag_id) VALUES (?, ?)');
-    foreach ($tagIds as $tagId) {
-        $stmt->execute([$knowledgeId, (int) $tagId]);
+
+    $findStmt = $pdo->prepare('SELECT id FROM knowledge_tags WHERE slug = ?');
+    $insertTagStmt = $pdo->prepare('INSERT INTO knowledge_tags (name, slug) VALUES (?, ?)');
+    $linkStmt = $pdo->prepare('INSERT IGNORE INTO knowledge_content_tags (knowledge_content_id, tag_id) VALUES (?, ?)');
+
+    foreach ($tagNames as $rawName) {
+        $name = trim((string) $rawName);
+        if ($name === '') {
+            continue;
+        }
+        $slug = slugify($name);
+        $findStmt->execute([$slug]);
+        $tagId = $findStmt->fetchColumn();
+        if ($tagId === false) {
+            $insertTagStmt->execute([$name, $slug]);
+            $tagId = (int) $pdo->lastInsertId();
+        }
+        $linkStmt->execute([$knowledgeId, (int) $tagId]);
     }
+}
+
+function admin_knowledge_tags_list(array $params): void
+{
+    require_permission('knowledge.manage');
+    json_success(db()->query('SELECT id, name, slug FROM knowledge_tags ORDER BY name ASC')->fetchAll());
 }

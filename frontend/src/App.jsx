@@ -2,6 +2,8 @@ import { lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import PublicLayout from './layouts/PublicLayout'
 import AdminLayout from './layouts/AdminLayout'
+import RequirePermission from './admin/components/RequirePermission'
+import { RESOURCE_CONFIGS } from './admin/resources.config'
 
 // Route-level code splitting (spec §41/§53): the admin bundle (forms,
 // data tables, rich text editor once Phase 7 lands) never ships to public
@@ -39,6 +41,21 @@ const GlossaryTerm = lazy(() => import('./pages/knowledge-center/GlossaryTerm'))
 
 const AdminLogin = lazy(() => import('./pages/admin/Login'))
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'))
+const AdminCoursesList = lazy(() => import('./pages/admin/CoursesList'))
+const AdminCourseForm = lazy(() => import('./pages/admin/CourseForm'))
+const AdminCourseCategories = lazy(() => import('./pages/admin/CourseCategories'))
+const AdminKnowledgeList = lazy(() => import('./pages/admin/KnowledgeList'))
+const AdminKnowledgeForm = lazy(() => import('./pages/admin/KnowledgeForm'))
+const AdminLearningPathSteps = lazy(() => import('./pages/admin/LearningPathSteps'))
+const AdminMediaLibrary = lazy(() => import('./pages/admin/MediaLibrary'))
+const AdminEnquiries = lazy(() => import('./pages/admin/Enquiries'))
+const AdminUsers = lazy(() => import('./pages/admin/Users'))
+const AdminSiteSettings = lazy(() => import('./pages/admin/SiteSettings'))
+const AdminRedirects = lazy(() => import('./pages/admin/Redirects'))
+const AdminAuditLog = lazy(() => import('./pages/admin/AuditLog'))
+const AdminSeoEditor = lazy(() => import('./pages/admin/SeoEditor'))
+const AdminResourceList = lazy(() => import('./pages/admin/generic/ResourceList'))
+const AdminResourceForm = lazy(() => import('./pages/admin/generic/ResourceForm'))
 
 export default function App() {
   return (
@@ -96,9 +113,136 @@ export default function App() {
         <Route path="admin/login" element={<AdminLogin />} />
         <Route path="admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
-          {/* Courses, Knowledge Center, leadership, testimonials, statistics,
-              events, FAQs, media library, enquiries, SEO, users, settings
-              CRUD routes are added in Phase 7. */}
+
+          <Route
+            path="courses"
+            element={
+              <RequirePermission permission="courses.manage">
+                <AdminCoursesList />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="courses/:id"
+            element={
+              <RequirePermission permission="courses.manage">
+                <AdminCourseForm />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="course-categories"
+            element={
+              <RequirePermission permission="courses.manage">
+                <AdminCourseCategories />
+              </RequirePermission>
+            }
+          />
+
+          <Route
+            path="knowledge"
+            element={
+              <RequirePermission permission="knowledge.manage">
+                <AdminKnowledgeList />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="knowledge/:id"
+            element={
+              <RequirePermission permission="knowledge.manage">
+                <AdminKnowledgeForm />
+              </RequirePermission>
+            }
+          />
+
+          {Object.values(RESOURCE_CONFIGS).map((config) => (
+            <Route key={config.key} path={config.key}>
+              <Route
+                index
+                element={
+                  <RequirePermission permission={config.permission}>
+                    <AdminResourceList resourceKey={config.key} />
+                  </RequirePermission>
+                }
+              />
+              <Route
+                path=":id"
+                element={
+                  <RequirePermission permission={config.permission}>
+                    <AdminResourceForm resourceKey={config.key} />
+                  </RequirePermission>
+                }
+              />
+              {config.hasSteps && (
+                <Route
+                  path=":id/steps"
+                  element={
+                    <RequirePermission permission={config.permission}>
+                      <AdminLearningPathSteps />
+                    </RequirePermission>
+                  }
+                />
+              )}
+            </Route>
+          ))}
+
+          <Route
+            path="media"
+            element={
+              <RequirePermission permission="media.upload">
+                <AdminMediaLibrary />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="enquiries"
+            element={
+              <RequirePermission permission="enquiries.view">
+                <AdminEnquiries />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="seo"
+            element={
+              <RequirePermission permission="seo.edit_basic">
+                <AdminSeoEditor />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="redirects"
+            element={
+              <RequirePermission permission="redirects.manage">
+                <AdminRedirects />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="settings"
+            element={
+              <RequirePermission permission="settings.manage">
+                <AdminSiteSettings />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="users"
+            element={
+              <RequirePermission permission="users.manage">
+                <AdminUsers />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="audit-log"
+            element={
+              <RequirePermission permission="audit_log.view">
+                <AdminAuditLog />
+              </RequirePermission>
+            }
+          />
         </Route>
       </Routes>
     </Suspense>

@@ -15,12 +15,16 @@ This repo is being built in phases (tracked in `docs/ARCHITECTURE.md` §N). As o
 | 5 — Knowledge Center hub, real search, article template | ✅ Done |
 | 6 — Career paths, learning paths, certification explorer, glossary | ✅ Done |
 | 8 — PHP API + database (real backend, live MySQL/MariaDB) | ✅ Done (`backend/`, `database/seed.sql`) |
-| 7 — Admin CMS (frontend, wired to the real API from Phase 8) | ⏳ Not yet started |
+| 7 — Admin CMS (frontend, wired to the real API from Phase 8) | ✅ Done (`frontend/src/admin/`, `frontend/src/pages/admin/`) |
 | 9–14 — SEO, security, responsive, performance, testing, deployment | ⏳ Not yet started |
 
-**What you can actually run locally today:** the full database — schema *and* seed data (step 3.3) — and a real, tested PHP REST API (step 3.5) alongside the frontend dev server (step 3.6). The backend is genuine: 60+ endpoints across courses, the Knowledge Center + cross-content search, careers, learning paths, certifications, glossary, testimonials, team, FAQs, events, resources, and public enquiry submission, plus a fully RBAC-enforced `/admin/*` surface (session auth, CSRF via double-submit cookie, per-permission checks on every write, file-based auth/enquiry rate limiting, an audit log, and media upload with real MIME-sniffing and SVG script-injection rejection) — all backed by live MySQL/MariaDB, not mocks or in-memory fixtures. It was verified end-to-end against a real MariaDB instance: every public route, the full admin create/update/delete/publish path, Super Admin vs. Editor permission boundaries, CSRF rejection on a missing token, auth rate-limit lockout, and a malicious SVG upload actually being rejected.
+**What you can actually run locally today:** the full database — schema *and* seed data (step 3.3) — a real, tested PHP REST API (step 3.5), the frontend dev server (step 3.6), and now a fully working **admin CMS** at `/admin` (step 3.7) that manages that same real data. The backend is genuine: 60+ endpoints across courses, the Knowledge Center + cross-content search, careers, learning paths, certifications, glossary, testimonials, team, FAQs, events, resources, and public enquiry submission, plus a fully RBAC-enforced `/admin/*` surface (session auth, CSRF via double-submit cookie, per-permission checks on every write, file-based auth/enquiry rate limiting, an audit log, and media upload with real MIME-sniffing and SVG script-injection rejection) — all backed by live MySQL/MariaDB, not mocks or in-memory fixtures.
 
-The public-facing React site (Phases 2–6) still renders from the placeholder data modules in `frontend/src/data/` — it was intentionally built that way so each content phase could ship without waiting on the backend. Wiring those pages to fetch from the real API above, and building the admin CMS UI that edits that same data, is Phase 7's job next (deliberately sequenced after Phase 8, so the CMS is built against a real API instead of a temporary one).
+The admin CMS covers every module from the spec: Courses (with curriculum/skills/tools/FAQs editors), Knowledge Center articles (with tag autocomplete), Careers, Learning Paths (with a reorderable step editor), Certifications, Glossary, Testimonials, Leadership & Faculty, FAQs, Events & Workshops, Resources, Media Library (drag-and-drop-free file upload with a real MIME-sniffing backend), Enquiries (with a status pipeline), Users (Super Admin only), Site Settings, Redirects, per-entity SEO metadata, and a read-only Audit Log — all built on one generic, config-driven CRUD framework (`frontend/src/admin/resources.config.js`) so every resource gets the same validated, permission-checked form and table without hand-rolling ~15 near-identical pages. The sidebar hides links a signed-in user lacks permission for, and every route is also guarded client-side — but neither is the real boundary: every single admin API call is independently permission-checked server-side regardless (verified directly: an Editor session gets redirected out of `/admin/users` even when the URL is typed in by hand, and the API itself still 403s that Editor's session on a raw request to `users.manage`-gated endpoints).
+
+It was all verified end-to-end in a real browser (Playwright) against a real MariaDB instance: log in, create/edit/delete a course and its curriculum, edit a career and a learning path's steps, upload a file, view enquiries and the audit log, and log out — plus the underlying API checks (CSRF rejection, auth rate-limit lockout, malicious SVG upload rejection, Super Admin vs. Editor permission boundaries). Two real bugs were caught and fixed in the process: a login response was being stored whole instead of unwrapping its `.user` field (silently broke every permission check after sign-in), and MySQL rejected a checkbox's `false` value in strict mode because PDO's native prepared statements can bind a PHP bool as an empty string instead of `0`.
+
+The public-facing React site (Phases 2–6) still renders from the placeholder data modules in `frontend/src/data/`, by design — the CMS above edits the real database, but nothing on the public site fetches from it yet. Wiring the public pages to the real API is the next piece of work.
 
 ## 1. Technology Stack
 
@@ -124,13 +128,24 @@ npm install
 npm run dev
 ```
 
-This starts Vite's dev server at `http://localhost:5173`. You should see the GIIS shell — sticky header, mobile nav drawer below `lg` width, footer, and every route from `docs/ARCHITECTURE.md` §A resolving to a page. `/api/*` requests are proxied to `http://127.0.0.1` (see `vite.config.js`) so they'll reach the backend from step 3.5 once the frontend is wired to call it (Phase 7) — until then the public pages still render from `frontend/src/data/*Placeholder.js`, so nothing on the public site depends on the backend being up yet.
+This starts Vite's dev server at `http://localhost:5173`. You should see the GIIS shell — sticky header, mobile nav drawer below `lg` width, footer, and every route from `docs/ARCHITECTURE.md` §A resolving to a page. `/api/*` requests are proxied to the backend from step 3.5 (see `vite.config.js` — defaults to `http://127.0.0.1:8000`, matching `php -S localhost:8000 -t backend`). The public marketing pages still render from `frontend/src/data/*Placeholder.js` rather than fetching from that API (by design — see the build-status note above), but the admin CMS at `/admin` is fully wired to it.
 
 To produce a production build: `npm run build` (outputs to `frontend/dist/`, ready to deploy as static files per `frontend/public/.htaccess`).
 
-### 3.7 Log in to the admin panel (API-level, until Phase 7's UI exists)
+### 3.7 Log in to the admin panel
 
-The `/admin/login` **page** is still a Phase 7 UI task, but the **API underneath it is real today**. You can authenticate against it directly:
+With the backend (3.5) and frontend (3.6) both running, open `http://localhost:5173/admin/login` and sign in with the seeded Super Admin account:
+
+```
+Username: superadmin
+Password: GiisAdmin#2026!
+```
+
+You'll land on the dashboard with a permission-filtered sidebar covering every content module (Courses, Knowledge Center, Careers, Learning Paths, Certifications, Glossary, Testimonials, Leadership & Faculty, FAQs, Events, Resources), Operations (Enquiries, Media Library), and System (SEO, Redirects, Site Settings, Users, Audit Log). **Change the placeholder password immediately** via Users → edit your own account — it's a placeholder shipped in source control, never a real production credential.
+
+To create an Editor account (content CRUD, no user/role/settings/advanced-SEO/delete access — see `docs/ARCHITECTURE.md` §F for the full permission matrix) go to Users → + New User and pick the Editor role.
+
+If you'd rather script against the API directly instead of the UI:
 
 ```bash
 curl -c cookies.txt -X POST http://localhost:8000/api/auth/login \
@@ -154,17 +169,24 @@ curl -b cookies.txt -X PUT http://localhost:8000/api/admin/courses/1 \
 
 Right now you can:
 1. Follow steps 3.1–3.4 to stand up the database with real content (schema + seed) — every table from `docs/ARCHITECTURE.md` §E is present and populated.
-2. Follow step 3.5 to run the real PHP API and exercise it directly with `curl` (public routes) or via the login flow above (admin routes) — see `backend/api/index.php` for the full route table.
-3. Follow step 3.6 to run the frontend and click through the entire site's navigation, mobile menu, and every route — content is placeholder (from `frontend/src/data/`), but the shell, layout, accessibility (skip link, focus states, keyboard nav), and design tokens are real.
-4. Read `docs/ARCHITECTURE.md` for the full sitemap, API surface, design tokens, and security/SEO architecture that the rest of the build follows.
+2. Follow step 3.5 to run the real PHP API and exercise it directly with `curl` (public routes) or via the login flow (admin routes) — see `backend/api/index.php` for the full route table.
+3. Follow step 3.6 to run the frontend and click through the entire public site's navigation, mobile menu, and every route — content is placeholder (from `frontend/src/data/`), but the shell, layout, accessibility (skip link, focus states, keyboard nav), and design tokens are real.
+4. Follow step 3.7 to sign in to the **admin CMS at `/admin`** and manage the real database through it — create/edit/delete courses (with curriculum, skills, tools, FAQs), Knowledge Center articles, careers, learning paths (with a step editor), certifications, glossary terms, testimonials, leadership/faculty, FAQs, events, resources, media, enquiries, users, site settings, redirects, SEO metadata, and the audit log.
+5. Read `docs/ARCHITECTURE.md` for the full sitemap, API surface, design tokens, and security/SEO architecture that the rest of the build follows.
 
-Phase 7 will wire the frontend (both the public site and a new `/admin` CMS UI) to the API from step 3.5 — this file will be updated in place as that lands.
+The public site not yet reading from the CMS's data is the one remaining gap — see the note at the top of this file.
 
 ## 5. Project structure (see `docs/ARCHITECTURE.md` §C/§D for full detail)
 
 ```
 giisindia/
-├── frontend/               ✅ React + Vite + Tailwind app, full route tree (Phase 2)
+├── frontend/
+│   └── src/
+│       ├── admin/            ✅ CMS framework: resources.config.js (one entry per resource),
+│       │                        shared DataTable/FormField/ConfirmDialog components, nav.config.js
+│       ├── pages/admin/      ✅ Dashboard, Courses, Knowledge, generic/ResourceList+Form, Media
+│       │                        Library, Enquiries, Users, Site Settings, Redirects, Audit Log, SEO
+│       └── ...                  full public route tree (Phase 2)
 ├── backend/                ✅ PHP 8 REST API — config/, includes/ (security, CRUD, upload,
 │                              validation), api/handlers/ (~20 files), api/index.php (router)
 ├── database/

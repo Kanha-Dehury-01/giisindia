@@ -1,13 +1,15 @@
 import { apiClient, ApiError } from './client'
 
-// Backend endpoints land in Phase 8. Until then this resolves to "logged
-// out" for any environment without the PHP API running, rather than
-// throwing and breaking the app shell.
+// Resolves to the current user object, or null when signed out — /auth/me
+// always responds 200 with { user: null } when there's no session (see
+// backend/api/handlers/auth.php), so this only returns null itself on a
+// genuine network/API failure (e.g. the backend isn't running).
 export async function fetchCurrentUser() {
   try {
-    return await apiClient.get('/auth/me')
+    const { user } = await apiClient.get('/auth/me')
+    return user
   } catch (error) {
-    if (error instanceof ApiError && (error.status === 401 || error.status === 0)) return null
+    if (error instanceof ApiError) return null
     return null
   }
 }

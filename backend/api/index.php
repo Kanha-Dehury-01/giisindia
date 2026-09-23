@@ -100,6 +100,7 @@ $routes = [
     ['PUT', '#^/admin/course-categories/(?P<id>\d+)$#', 'admin_courses.php', 'admin_course_categories_update'],
     ['DELETE', '#^/admin/course-categories/(?P<id>\d+)$#', 'admin_courses.php', 'admin_course_categories_delete'],
 
+    ['GET', '#^/admin/knowledge-tags$#', 'admin_knowledge.php', 'admin_knowledge_tags_list'],
     ['GET', '#^/admin/knowledge$#', 'admin_knowledge.php', 'admin_knowledge_list'],
     ['POST', '#^/admin/knowledge$#', 'admin_knowledge.php', 'admin_knowledge_create'],
     ['GET', '#^/admin/knowledge/(?P<id>\d+)$#', 'admin_knowledge.php', 'admin_knowledge_get'],
