@@ -3,9 +3,10 @@
 .env.local
 backend/.env
 
-# PHP
+# PHP (composer is dev-only, for PHPUnit — see backend/composer.json;
+# composer.lock IS committed for reproducible test installs, vendor/ is not)
 backend/vendor/
-backend/composer.lock
+backend/.phpunit.result.cache
 
 # Uploaded media (git-ignored; folders kept via .gitkeep)
 backend/api/uploads/*

@@ -799,4 +799,11 @@ INSERT INTO site_settings (`key`, value, type, `group`) VALUES ('site_tagline', 
 -- CHANGE THIS PASSWORD IMMEDIATELY AFTER FIRST LOGIN -- see README.md.
 INSERT INTO users (name, email, username, password_hash, role_id) VALUES ('GIIS Super Admin', 'admin@giisindia.in', 'superadmin', '$2y$12$b5Cf1b5cFR8i9KY62TVfG.5zbsOptv1xPtpxVBEcnhDJu1lxpyMdi', 1);
 
+-- ---- default Editor (placeholder credentials, role_id=2) ----
+-- Username: editor1  Password: EditorPass123!
+-- Lets you exercise/test the RBAC boundary (spec's two-role requirement) without
+-- creating one by hand; also used by the e2e RBAC test (frontend/e2e/admin.spec.js).
+-- CHANGE THIS PASSWORD IMMEDIATELY AFTER FIRST LOGIN -- see README.md.
+INSERT INTO users (name, email, username, password_hash, role_id) VALUES ('GIIS Editor', 'editor@giisindia.in', 'editor1', '$2y$12$9V2mLnOfmDgLfx.J.RyUC.CL6lfJIZAjn.tpmNpftdyNcH0mVzpK2', 2);
+
 SET FOREIGN_KEY_CHECKS = 1;

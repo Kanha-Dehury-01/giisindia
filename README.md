@@ -20,7 +20,8 @@ This repo is being built in phases (tracked in `docs/ARCHITECTURE.md` §N). As o
 | 10 — Security hardening (global error handler, CSP, session hardening) | ✅ Done (`backend/api/index.php`, `frontend/public/.htaccess`) |
 | 11 — Responsive optimization (verified across 172 page×viewport combos) | ✅ Done (`frontend/src/layouts/AdminLayout.jsx`) |
 | 12 — Performance (vendor chunk splitting, search query pre-filtering) | ✅ Done (`frontend/vite.config.js`, `backend/api/handlers/knowledge.php`) |
-| 13–14 — Testing, deployment | ⏳ Not yet started |
+| 13 — Testing (PHPUnit: 34 tests; Playwright e2e: 50 tests) | ✅ Done (`backend/tests/`, `frontend/e2e/`) |
+| 14 — cPanel deployment documentation | ⏳ Not yet started |
 
 **What you can actually run locally today:** the full database — schema *and* seed data (step 3.3) — a real, tested PHP REST API (step 3.5), the frontend dev server (step 3.6), and now a fully working **admin CMS** at `/admin` (step 3.7) that manages that same real data. The backend is genuine: 60+ endpoints across courses, the Knowledge Center + cross-content search, careers, learning paths, certifications, glossary, testimonials, team, FAQs, events, resources, and public enquiry submission, plus a fully RBAC-enforced `/admin/*` surface (session auth, CSRF via double-submit cookie, per-permission checks on every write, file-based auth/enquiry rate limiting, an audit log, and media upload with real MIME-sniffing and SVG script-injection rejection) — all backed by live MySQL/MariaDB, not mocks or in-memory fixtures.
 
@@ -205,7 +206,44 @@ giisindia/
 └── README.md                this file
 ```
 
-## 6. Troubleshooting
+## 6. Testing
+
+Two real, checked-in automated test suites (Phase 9's manual verification scripts formalized into something you can actually run and that fails loudly on a regression) — no mocks, both run against a real MySQL/MariaDB database.
+
+### 6.1 Backend — PHPUnit
+
+Unit tests (`slugify()`, the `Validator` class, pagination helpers, password hashing) plus integration tests that exercise `CrudResource` and the polymorphic relationship resolver against a **dedicated test database** (`giisindia_test`), never your dev database.
+
+```bash
+# One-time setup: create and schema-load the test database
+mysql -u root -p -e "CREATE DATABASE giisindia_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -u root -p giisindia_test < database/schema.sql
+# Grant your existing app DB user access to it too (reuses your .env's DB_USER/DB_PASSWORD)
+mysql -u root -p -e "GRANT ALL PRIVILEGES ON giisindia_test.* TO 'your_db_user'@'localhost';"
+
+cd backend
+composer install
+composer test
+# or directly: ./vendor/bin/phpunit
+```
+
+`tests/bootstrap.php` only overrides `DB_NAME`/`DB_HOST` to point at `giisindia_test` — it reuses whatever `DB_USER`/`DB_PASSWORD` are already in your `.env`, so there's nothing to configure beyond the grant above. 34 tests, all currently passing.
+
+### 6.2 Frontend — Playwright end-to-end
+
+Drives a real browser against the real backend + Vite dev server: the full admin CMS flow (login → create/edit/delete a course with curriculum content → edit a generic resource → the learning-path step editor → every remaining admin screen → logout), RBAC enforcement (an Editor genuinely can't reach `/admin/users`, even by typing the URL), and the Phase 11 responsive overflow check across mobile/tablet/laptop for both the public site and the admin CMS.
+
+```bash
+# Both dev servers must already be running (steps 3.5 and 3.6)
+cd frontend
+npm run test:e2e
+```
+
+Uses the seeded `superadmin` **and** `editor1` accounts from `database/seed.sql` — both ship in the seed data specifically so this suite (and manual RBAC testing) works out of the box. 50 tests, all currently passing, and repeatable back-to-back (a `globalSetup` clears the backend's file-based login rate limiter before each run, so the suite's own logins never trip the same 429 a real user would eventually hit).
+
+In a sandboxed environment where `npx playwright install` can't download a browser, point `PLAYWRIGHT_CHROMIUM_PATH` at a pre-installed Chromium binary: `PLAYWRIGHT_CHROMIUM_PATH=/path/to/chrome npm run test:e2e`. Leave it unset anywhere Playwright can manage its own browser normally.
+
+## 7. Troubleshooting
 
 - **`mysql` command not found**: use phpMyAdmin (`http://localhost/phpmyadmin`) instead — click your new `giisindia` database, go to Import, and select `database/schema.sql`.
 - **Foreign key errors on import**: make sure you're importing `database/schema.sql` in one shot (it sets `FOREIGN_KEY_CHECKS = 0` at the top and restores it at the end) rather than copy-pasting partial sections.
