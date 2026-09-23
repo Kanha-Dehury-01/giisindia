@@ -19,7 +19,8 @@ This repo is being built in phases (tracked in `docs/ARCHITECTURE.md` §N). As o
 | 9 — SEO (meta/OG tags, structured data, sitemap, noindex on stubs) | ✅ Done (`backend/api/sitemap.php`, `frontend/src/hooks/useSeo.js`) |
 | 10 — Security hardening (global error handler, CSP, session hardening) | ✅ Done (`backend/api/index.php`, `frontend/public/.htaccess`) |
 | 11 — Responsive optimization (verified across 172 page×viewport combos) | ✅ Done (`frontend/src/layouts/AdminLayout.jsx`) |
-| 12–14 — Performance, testing, deployment | ⏳ Not yet started |
+| 12 — Performance (vendor chunk splitting, search query pre-filtering) | ✅ Done (`frontend/vite.config.js`, `backend/api/handlers/knowledge.php`) |
+| 13–14 — Testing, deployment | ⏳ Not yet started |
 
 **What you can actually run locally today:** the full database — schema *and* seed data (step 3.3) — a real, tested PHP REST API (step 3.5), the frontend dev server (step 3.6), and now a fully working **admin CMS** at `/admin` (step 3.7) that manages that same real data. The backend is genuine: 60+ endpoints across courses, the Knowledge Center + cross-content search, careers, learning paths, certifications, glossary, testimonials, team, FAQs, events, resources, and public enquiry submission, plus a fully RBAC-enforced `/admin/*` surface (session auth, CSRF via double-submit cookie, per-permission checks on every write, file-based auth/enquiry rate limiting, an audit log, and media upload with real MIME-sniffing and SVG script-injection rejection) — all backed by live MySQL/MariaDB, not mocks or in-memory fixtures.
 

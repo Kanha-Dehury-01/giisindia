@@ -83,7 +83,7 @@ export default function MediaLibrary() {
               <div className="flex aspect-square items-center justify-center bg-surface-muted">
                 {item.mime_type.startsWith('image/') ? (
                   // eslint-disable-next-line jsx-a11y/img-redundant-alt
-                  <img src={item.path} alt={item.alt_text ?? item.original_filename} className="h-full w-full object-cover" />
+                  <img src={item.path} alt={item.alt_text ?? item.original_filename} loading="lazy" className="h-full w-full object-cover" />
                 ) : (
                   <span className="text-xs text-text-muted">{item.mime_type}</span>
                 )}

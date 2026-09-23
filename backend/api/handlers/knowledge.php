@@ -111,9 +111,31 @@ function knowledge_search(array $params): void
     foreach ($activeSources as $sourceKey) {
         $src = $sources[$sourceKey];
         $bodyCols = implode(', ', $src['body']);
+
+        // Push the "could this row possibly score > 0" filter into SQL so a
+        // large table doesn't mean fetching every published row (and its
+        // full body text) into PHP on every keystroke of a live search —
+        // every match term below (full query + each word) mirrors exactly
+        // what scoreEntry-equivalent logic further down awards points for,
+        // so this narrows the row set without changing which rows can win.
+        $matchColumns = array_merge([$src['title']], $src['body']);
+        $needles = array_merge([$query], $queryWords);
+        $likeClauses = [];
+        $likeParams = [];
+        foreach ($needles as $needle) {
+            foreach ($matchColumns as $col) {
+                $likeClauses[] = "`$col` LIKE ?";
+                $likeParams[] = '%' . $needle . '%';
+            }
+        }
+
         $sql = "SELECT id, `{$src['title']}` AS title, `{$src['slug']}` AS slug, $bodyCols
-                FROM `{$src['table']}` WHERE publish_status = 'published' AND ({$src['extraWhere']})";
-        $rows = db()->query($sql)->fetchAll();
+                FROM `{$src['table']}` WHERE publish_status = 'published' AND ({$src['extraWhere']})
+                AND (" . implode(' OR ', $likeClauses) . ')
+                LIMIT 500';
+        $stmt = db()->prepare($sql);
+        $stmt->execute($likeParams);
+        $rows = $stmt->fetchAll();
 
         foreach ($rows as $row) {
             $titleLower = mb_strtolower((string) $row['title']);

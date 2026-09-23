@@ -20,5 +20,20 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
+    rollupOptions: {
+      output: {
+        // React/ReactDOM/React Router change far less often than the app's
+        // own code — splitting them into their own chunk means a deploy
+        // that only touches app code doesn't invalidate the browser cache
+        // for this (large, rarely-changing) vendor code (spec §41/§53).
+        // This project's Vite build (rolldown) requires the function form —
+        // the plain-object form Rollup also accepts throws at build time here.
+        manualChunks(id) {
+          if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/') || id.includes('node_modules/react-router')) {
+            return 'react-vendor'
+          }
+        },
+      },
+    },
   },
 })
