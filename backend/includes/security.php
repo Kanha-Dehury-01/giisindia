@@ -19,6 +19,13 @@ function start_secure_session(): void
         return;
     }
 
+    // Reject any session ID the client supplies that the server never
+    // generated (session fixation defense), and never accept a session ID
+    // from the URL/query string — cookie only.
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.use_only_cookies', '1');
+    ini_set('session.use_trans_sid', '0');
+
     session_name(SESSION_NAME);
     session_set_cookie_params([
         'lifetime' => 0,
@@ -122,7 +129,7 @@ function verify_password(string $plain, string $hash): bool
     return password_verify($plain, $hash);
 }
 
-function write_audit_log(int $userId, string $action, ?string $entityType = null, ?int $entityId = null, ?array $meta = null): void
+function write_audit_log(?int $userId, string $action, ?string $entityType = null, ?int $entityId = null, ?array $meta = null): void
 {
     $stmt = db()->prepare(
         'INSERT INTO audit_logs (user_id, action, entity_type, entity_id, meta_json, ip_address) VALUES (?, ?, ?, ?, ?, ?)'

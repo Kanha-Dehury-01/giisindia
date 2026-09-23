@@ -20,6 +20,35 @@ require_once __DIR__ . '/middleware/rate_limit.php';
  * themselves (both exit), so this file never has to shape a response.
  */
 
+// ---- Global error/exception handling ------------------------------------
+// Every response out of this API is the fixed JSON envelope — never a raw
+// PHP warning/fatal-error HTML page leaking file paths and stack traces
+// (a real leak observed during development testing, before this existed).
+// PHP warnings/notices are promoted to exceptions so nothing slips through
+// as unstructured output mixed into a JSON body.
+set_error_handler(function (int $severity, string $message, string $file, int $line): bool {
+    if (!(error_reporting() & $severity)) {
+        return false;
+    }
+    throw new ErrorException($message, 0, $severity, $file, $line);
+});
+set_exception_handler(function (Throwable $e): void {
+    error_log('Unhandled exception: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+    if (!headers_sent()) {
+        json_error('server_error', 'Something went wrong. Please try again.', 500);
+    }
+    exit;
+});
+
+// ---- Security headers (defense in depth alongside api/.htaccess, and the
+// only place these apply when running under `php -S` for local dev) -------
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+if (APP_ENV !== 'development') {
+    header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+}
+
 // ---- CORS -------------------------------------------------------------
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if ($origin !== '' && in_array($origin, ALLOWED_ORIGINS, true)) {

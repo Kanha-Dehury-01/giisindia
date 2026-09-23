@@ -25,6 +25,10 @@ function auth_login(array $params): void
     $user = $stmt->fetch();
 
     if (!$user || !$user['active'] || !verify_password($body['password'], $user['password_hash'])) {
+        // Logged even without a matched user (meta carries what was
+        // attempted) — repeated failures against one username, or a spray
+        // across many, are exactly what an audit trail should surface.
+        write_audit_log($user ? (int) $user['id'] : null, 'auth.login_failed', null, null, ['attempted_username' => $body['username']]);
         json_error('invalid_credentials', 'Incorrect username or password.', 401);
     }
 

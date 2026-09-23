@@ -41,11 +41,13 @@ function handle_media_upload(array $file): array
         json_error('unsupported_file_type', 'Only JPEG, PNG, WebP, AVIF, and SVG images are supported.', 400);
     }
 
-    // SVGs can carry <script>/onload payloads — strip anything that
-    // isn't plain markup before it ever touches disk.
+    // SVGs can carry <script>/onload payloads, embedded HTML, or external
+    // references — reject anything beyond plain vector markup before it
+    // ever touches disk.
     if ($mimeType === 'image/svg+xml') {
         $contents = file_get_contents($file['tmp_name']);
-        if ($contents === false || preg_match('/<script|on\w+\s*=|javascript:/i', $contents)) {
+        $unsafePattern = '/<script|on\w+\s*=|javascript:|data:text\/html|<iframe|<embed|<object|<foreignObject/i';
+        if ($contents === false || preg_match($unsafePattern, $contents)) {
             json_error('unsafe_svg', 'This SVG file cannot be accepted.', 400);
         }
     }

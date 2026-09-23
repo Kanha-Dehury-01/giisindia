@@ -43,20 +43,33 @@ export default function AuditLog() {
                 <th className="px-4 py-3">Action</th>
                 <th className="px-4 py-3">Entity</th>
                 <th className="px-4 py-3">IP</th>
+                <th className="px-4 py-3">Details</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {rows.map((row) => (
-                <tr key={row.id}>
-                  <td className="px-4 py-3 text-text-muted">{new Date(row.created_at).toLocaleString()}</td>
-                  <td className="px-4 py-3">{row.user_name ?? 'System'}</td>
-                  <td className="px-4 py-3 font-mono text-xs">{row.action}</td>
-                  <td className="px-4 py-3 text-text-muted">
-                    {row.entity_type ? `${row.entity_type} #${row.entity_id}` : '—'}
-                  </td>
-                  <td className="px-4 py-3 text-text-muted">{row.ip_address}</td>
-                </tr>
-              ))}
+              {rows.map((row) => {
+                let meta = null
+                try {
+                  meta = row.meta_json ? JSON.parse(row.meta_json) : null
+                } catch {
+                  meta = null
+                }
+                const isAnonymousAction = !row.user_name && row.action.startsWith('auth.')
+                return (
+                  <tr key={row.id}>
+                    <td className="px-4 py-3 text-text-muted">{new Date(row.created_at).toLocaleString()}</td>
+                    <td className="px-4 py-3">{row.user_name ?? (isAnonymousAction ? 'Unrecognized' : 'System')}</td>
+                    <td className="px-4 py-3 font-mono text-xs">{row.action}</td>
+                    <td className="px-4 py-3 text-text-muted">
+                      {row.entity_type ? `${row.entity_type} #${row.entity_id}` : '—'}
+                    </td>
+                    <td className="px-4 py-3 text-text-muted">{row.ip_address}</td>
+                    <td className="max-w-xs truncate px-4 py-3 text-xs text-text-muted" title={meta ? JSON.stringify(meta) : ''}>
+                      {meta ? Object.entries(meta).map(([k, v]) => `${k}: ${v}`).join(', ') : '—'}
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>

@@ -21,17 +21,28 @@ RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
 # ---- Everything else (all frontend routes, including /admin/*) falls
-#      back to the React app, which handles routing client-side. Phase 9
-#      adds prerendered static HTML per indexable route ahead of this
-#      fallback, so crawlers hit real markup instead of this shell. ----
+#      back to the React app, which handles routing client-side. Build-time
+#      prerendering to static HTML per route is a deferred enhancement
+#      (docs/ARCHITECTURE.md §N) — the public site doesn't read from the
+#      live API yet, so there's nothing real to prerender until it does. ----
 RewriteRule ^ index.html [L]
 
 # ---- Security headers ----
+# CSP is scoped to what this app actually loads (checked against index.html
+# and every external URL in src/): same-origin scripts/styles/images/API
+# calls, plus Google Fonts. style-src needs 'unsafe-inline' because the
+# motion library (motion/react) animates via inline `style` attributes —
+# without it every animation on the site breaks. Verify against the live
+# site's browser console after deploying (Phase 14 QA) before relying on
+# this as a hard guarantee; it has not been checked against a real
+# `httpd` in this environment (only against `php -S`/Vite dev, where
+# .htaccess is not processed at all).
 <IfModule mod_headers.c>
   Header set X-Content-Type-Options "nosniff"
   Header set X-Frame-Options "SAMEORIGIN"
   Header set Referrer-Policy "strict-origin-when-cross-origin"
   Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+  Header set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
 </IfModule>
 
 # ---- Compression ----
