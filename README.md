@@ -14,10 +14,13 @@ This repo is being built in phases (tracked in `docs/ARCHITECTURE.md` §N). As o
 | 4 — Course catalogue (search/filter/sort/pagination) + detail pages | ✅ Done |
 | 5 — Knowledge Center hub, real search, article template | ✅ Done |
 | 6 — Career paths, learning paths, certification explorer, glossary | ✅ Done |
-| 7–8 — Admin CMS, PHP API | ⏳ Not yet started (`/admin/login` shell exists; no backend to authenticate against yet) |
+| 8 — PHP API + database (real backend, live MySQL/MariaDB) | ✅ Done (`backend/`, `database/seed.sql`) |
+| 7 — Admin CMS (frontend, wired to the real API from Phase 8) | ⏳ Not yet started |
 | 9–14 — SEO, security, responsive, performance, testing, deployment | ⏳ Not yet started |
 
-**What you can actually run locally today:** the database schema (step 3.3), and the frontend dev server (step 3.6) — the entire public-facing site is real and interactive: homepage, course catalogue with working search/filters/pagination and detail pages, the Knowledge Center hub with real cross-content search (courses/careers/certifications/learning paths/guides/glossary, ranked and category-tabbed) plus a global quick-search overlay, career path and learning path pages with visual roadmaps, the certification explorer, and the A-Z glossary. All of it runs on placeholder data shaped exactly like the matching database table, so Phase 8's real API swap-in is additive, not a rewrite. Only `/admin/*` and anything requiring the PHP backend (login, form submission, real content) aren't functional yet — that's Phase 7/8.
+**What you can actually run locally today:** the full database — schema *and* seed data (step 3.3) — and a real, tested PHP REST API (step 3.5) alongside the frontend dev server (step 3.6). The backend is genuine: 60+ endpoints across courses, the Knowledge Center + cross-content search, careers, learning paths, certifications, glossary, testimonials, team, FAQs, events, resources, and public enquiry submission, plus a fully RBAC-enforced `/admin/*` surface (session auth, CSRF via double-submit cookie, per-permission checks on every write, file-based auth/enquiry rate limiting, an audit log, and media upload with real MIME-sniffing and SVG script-injection rejection) — all backed by live MySQL/MariaDB, not mocks or in-memory fixtures. It was verified end-to-end against a real MariaDB instance: every public route, the full admin create/update/delete/publish path, Super Admin vs. Editor permission boundaries, CSRF rejection on a missing token, auth rate-limit lockout, and a malicious SVG upload actually being rejected.
+
+The public-facing React site (Phases 2–6) still renders from the placeholder data modules in `frontend/src/data/` — it was intentionally built that way so each content phase could ship without waiting on the backend. Wiring those pages to fetch from the real API above, and building the admin CMS UI that edits that same data, is Phase 7's job next (deliberately sequenced after Phase 8, so the CMS is built against a real API instead of a temporary one).
 
 ## 1. Technology Stack
 
@@ -62,18 +65,25 @@ mysql -u root -p giisindia < database/schema.sql
 
 (XAMPP's default MySQL root user usually has **no password** — just press Enter when prompted, or use phpMyAdmin at `http://localhost/phpmyadmin` and import `database/schema.sql` there instead of the command line.)
 
-This creates all tables and seeds:
+`schema.sql` creates all tables and seeds:
 - The two default roles (Super Admin, Editor) and their permissions.
 - The 20 homepage section placeholders.
 - Six homepage statistics rows, all set to `[UPDATE BEFORE LAUNCH]` — replace with real, verified numbers before going live (see `docs/ARCHITECTURE.md` §O).
 
-Once `database/seed.sql` lands (Phase 8), you'll also run:
+Then load the real content data:
 
 ```bash
 mysql -u root -p giisindia < database/seed.sql
 ```
 
-which will create a default admin login and seed the 23 GIIS courses from the spec with placeholder descriptions.
+This seeds the 23 real GIIS courses (with curriculum/skills/tools/outcomes/FAQs), the 10 careers, 12 certifications, 7 learning paths (with steps), 15 Knowledge Center articles (with tags and cross-content relationships), 12 glossary terms, FAQs, the 3 hero slides, starter site settings, and — most importantly — **a default Super Admin login**:
+
+```
+Username: superadmin
+Password: GiisAdmin#2026!
+```
+
+**Change this password immediately after your first login** (`PUT /api/admin/users/1`) — it is a placeholder shipped in source control, never a real production credential. All descriptive text (course descriptions, durations, bios, testimonial quotes, etc.) is an obvious `[PLACEHOLDER]` per the project brief — replace it with GIIS-supplied content via the admin CMS (Phase 7) before launch.
 
 ### 3.4 Configure environment variables
 
@@ -83,19 +93,28 @@ From the project root:
 cp .env.example .env
 ```
 
-Edit `.env` and set your local DB credentials (for a fresh XAMPP install, `DB_USER=root` and `DB_PASSWORD=` — empty — is typical; don't use root in anything beyond local dev). `backend/config/config.php` (Phase 8) loads this file automatically.
+Edit `.env` and set your local DB credentials (for a fresh XAMPP install, `DB_USER=root` and `DB_PASSWORD=` — empty — is typical; don't use root in anything beyond local dev). `backend/config/config.php` loads this file automatically — it reads the project-root `.env` first, falling back to `backend/.env` if you'd rather keep it colocated with the API. **Never commit a real `.env`** — it's git-ignored; only `.env.example` (a template with no real secrets) is tracked.
 
-### 3.5 Point Apache at the backend (once Phase 8 lands)
+### 3.5 Run the backend
 
-Point an Apache vhost's document root at the `backend/` folder — or symlink/copy `backend/` into XAMPP's `htdocs` (e.g. `C:\xampp\htdocs\giisindia-api` or `htdocs/giisindia-api`). Make sure `mod_rewrite` is enabled (it is by default in XAMPP). The API will then be reachable at:
+**Quickest option — PHP's built-in server** (no Apache/vhost config needed, good for local dev):
 
+```bash
+php -S localhost:8000 -t backend
 ```
-http://localhost/giisindia-api/api/...
+
+The API is then reachable at `http://localhost:8000/api/...`. This is exactly how the backend was tested during development (see "What you can actually run locally today" above).
+
+**Or, via Apache/XAMPP:** point a vhost's document root at the `backend/` folder — or symlink/copy `backend/` into XAMPP's `htdocs` (e.g. `C:\xampp\htdocs\giisindia-api`). Make sure `mod_rewrite` is enabled (default in XAMPP). The API is then reachable at `http://localhost/giisindia-api/api/...` (or `http://localhost/api/...` if the vhost's document root points directly at `backend/`).
+
+Either way, `backend/api/.htaccess` (Apache) or the router in `backend/api/index.php` handles the routing — all requests to `/api/*` go through the front controller at `backend/api/index.php`. A quick smoke test once the server is up:
+
+```bash
+curl http://localhost:8000/api/homepage
+curl http://localhost:8000/api/courses
 ```
 
-(or `http://localhost/api/...` if you point the vhost's document root directly at `backend/`).
-
-`backend/api/.htaccess` handles the routing — all requests to `/api/*` go through `backend/api/index.php`.
+Both should return `{"success":true,"data":[...],...}` once `database/seed.sql` has been loaded.
 
 ### 3.6 Run the frontend dev server
 
@@ -105,32 +124,52 @@ npm install
 npm run dev
 ```
 
-This starts Vite's dev server at `http://localhost:5173`. You should see the GIIS shell — sticky header, mobile nav drawer below `lg` width, footer, and every route from `docs/ARCHITECTURE.md` §A resolving to a page (a placeholder page, until its content phase lands). `/api/*` requests are proxied to `http://127.0.0.1` (see `vite.config.js`) so they'll reach a backend once Phase 8 exists; until then, anything that calls the API (like `/admin/login`) will fail the request rather than break the page.
+This starts Vite's dev server at `http://localhost:5173`. You should see the GIIS shell — sticky header, mobile nav drawer below `lg` width, footer, and every route from `docs/ARCHITECTURE.md` §A resolving to a page. `/api/*` requests are proxied to `http://127.0.0.1` (see `vite.config.js`) so they'll reach the backend from step 3.5 once the frontend is wired to call it (Phase 7) — until then the public pages still render from `frontend/src/data/*Placeholder.js`, so nothing on the public site depends on the backend being up yet.
 
 To produce a production build: `npm run build` (outputs to `frontend/dist/`, ready to deploy as static files per `frontend/public/.htaccess`).
 
-### 3.7 Log in to the admin panel
+### 3.7 Log in to the admin panel (API-level, until Phase 7's UI exists)
 
-Once Phase 8's seed data is in place, the admin panel will be reachable at `http://localhost:5173/admin/login` in dev (or `/admin/login` on the built site) with a placeholder Super Admin account documented in `database/seed.sql`'s comments at that time. **Change the placeholder password immediately** — it is never a real credential committed to source control.
+The `/admin/login` **page** is still a Phase 7 UI task, but the **API underneath it is real today**. You can authenticate against it directly:
 
-## 4. What works today (before Phase 8 lands)
+```bash
+curl -c cookies.txt -X POST http://localhost:8000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"superadmin","password":"GiisAdmin#2026!"}'
+
+curl -b cookies.txt http://localhost:8000/api/admin/courses
+```
+
+The login response includes a `csrf_token` — every non-GET admin request after that must send it back as an `X-CSRF-Token` header (double-submit-cookie pattern; see `docs/ARCHITECTURE.md` §M), e.g.:
+
+```bash
+curl -b cookies.txt -X PUT http://localhost:8000/api/admin/courses/1 \
+  -H "Content-Type: application/json" -H "X-CSRF-Token: <token from login response>" \
+  -d '{"is_featured": true}'
+```
+
+**Change the placeholder password immediately** (`PUT /api/admin/users/1`) — it is never a real credential to keep past initial setup.
+
+## 4. What works today
 
 Right now you can:
-1. Follow steps 3.1–3.4 to stand up the database and inspect the schema (via phpMyAdmin, or any MySQL client) — every table from `docs/ARCHITECTURE.md` §E should be present.
-2. Follow step 3.6 to run the frontend and click through the entire site's navigation, mobile menu, and every route — content is placeholder, but the shell, layout, accessibility (skip link, focus states, keyboard nav), and design tokens are real.
-3. Read `docs/ARCHITECTURE.md` for the full sitemap, API surface, design tokens, and security/SEO architecture that the rest of the build follows.
+1. Follow steps 3.1–3.4 to stand up the database with real content (schema + seed) — every table from `docs/ARCHITECTURE.md` §E is present and populated.
+2. Follow step 3.5 to run the real PHP API and exercise it directly with `curl` (public routes) or via the login flow above (admin routes) — see `backend/api/index.php` for the full route table.
+3. Follow step 3.6 to run the frontend and click through the entire site's navigation, mobile menu, and every route — content is placeholder (from `frontend/src/data/`), but the shell, layout, accessibility (skip link, focus states, keyboard nav), and design tokens are real.
+4. Read `docs/ARCHITECTURE.md` for the full sitemap, API surface, design tokens, and security/SEO architecture that the rest of the build follows.
 
-Steps 3.5 and 3.7 will become real once Phase 8 lands — this file will be updated in place (not rewritten) as that phase's actual endpoints/commands are confirmed to match what's documented here.
+Phase 7 will wire the frontend (both the public site and a new `/admin` CMS UI) to the API from step 3.5 — this file will be updated in place as that lands.
 
-## 5. Project structure (planned — see `docs/ARCHITECTURE.md` §C/§D for full detail)
+## 5. Project structure (see `docs/ARCHITECTURE.md` §C/§D for full detail)
 
 ```
 giisindia/
 ├── frontend/               ✅ React + Vite + Tailwind app, full route tree (Phase 2)
-├── backend/                PHP API (Phase 8)
+├── backend/                ✅ PHP 8 REST API — config/, includes/ (security, CRUD, upload,
+│                              validation), api/handlers/ (~20 files), api/index.php (router)
 ├── database/
-│   ├── schema.sql           ✅ full fresh-install schema (this exists now)
-│   ├── seed.sql              demo/placeholder content (Phase 8)
+│   ├── schema.sql           ✅ full fresh-install schema (37 tables)
+│   ├── seed.sql              ✅ real course/career/certification/etc. content + admin user
 │   └── migrations/           incremental migrations, once schema changes post-launch
 ├── docs/
 │   └── ARCHITECTURE.md      ✅ sitemap, system/frontend/backend/CMS/SEO/security architecture
@@ -143,3 +182,6 @@ giisindia/
 - **`mysql` command not found**: use phpMyAdmin (`http://localhost/phpmyadmin`) instead — click your new `giisindia` database, go to Import, and select `database/schema.sql`.
 - **Foreign key errors on import**: make sure you're importing `database/schema.sql` in one shot (it sets `FOREIGN_KEY_CHECKS = 0` at the top and restores it at the end) rather than copy-pasting partial sections.
 - **Port conflicts**: if Apache won't start because port 80 is taken, change XAMPP's Apache port in `httpd.conf`, or stop the conflicting service (commonly Skype or another local web server).
+- **API returns `{"error":{"code":"db_unavailable",...}}`**: MySQL/MariaDB isn't running, or `.env`'s `DB_*` values don't match a real user/database. Confirm with `mysqladmin ping` and double-check `DB_NAME`/`DB_USER`/`DB_PASSWORD` against what you created in step 3.3.
+- **`{"error":{"code":"csrf_mismatch",...}}` on an admin request**: every non-GET `/api/admin/*` (and any non-GET request besides login/enquiry submission) needs an `X-CSRF-Token` header matching the `csrf_token` from your login response (or `GET /api/csrf-token`) — see step 3.7.
+- **`{"error":{"code":"rate_limited",...}}`**: the file-based limiter in `backend/api/middleware/rate_limit.php` caps login attempts and enquiry submissions per IP. During local testing this state lives in `backend/storage/ratelimit/` — delete that folder's contents to reset it.

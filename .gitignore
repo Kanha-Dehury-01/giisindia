@@ -1,0 +1,19 @@
+# Environment / secrets — never commit real credentials
+.env
+.env.local
+backend/.env
+
+# PHP
+backend/vendor/
+backend/composer.lock
+
+# Uploaded media (git-ignored; folders kept via .gitkeep)
+backend/api/uploads/*
+!backend/api/uploads/.gitkeep
+
+# Rate-limiter state (file-based, regenerates automatically)
+backend/storage/
+
+# OS / editor
+.DS_Store
+*.swp

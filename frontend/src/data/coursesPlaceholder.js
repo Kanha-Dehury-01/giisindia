@@ -19,7 +19,11 @@
 function slugify(title) {
   return title
     .toLowerCase()
-    .replace(/[()+/]/g, '')
+    // '+' is meaningful here (e.g. "CGEH Elite" vs "CGEH Elite Plus+" are
+    // different programs) — spell it out before stripping punctuation, or
+    // every tier's "+" variant collapses onto its base tier's slug.
+    .replace(/\+/g, '-plus')
+    .replace(/[()/]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '')
 }

@@ -1,0 +1,13 @@
+RewriteEngine On
+
+# Every request under /api/ is handled by the front controller; PATH_INFO
+# carries the remainder (see index.php's path resolution).
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>

@@ -440,20 +440,22 @@ Homepage (`pages/Home.jsx`) composes, in order, the 20 sections from spec §8 �
 
 Tracked as tasks #1–#14 in this session's task list; summarized here for reference:
 
-1. Architecture + design system (this document) — **in progress**
-2. Frontend shell + routing
-3. Homepage
-4. Course catalogue + detail pages
-5. Knowledge Center + search
-6. Career paths + learning paths + certification explorer + glossary
-7. Admin CMS
-8. PHP API + database (schema applied, endpoints implemented)
+1. Architecture + design system (this document) — **done**
+2. Frontend shell + routing — **done**
+3. Homepage — **done**
+4. Course catalogue + detail pages — **done**
+5. Knowledge Center + search — **done**
+6. Career paths + learning paths + certification explorer + glossary — **done**
+8. PHP API + database — **done**, out of numeric order and ahead of 7 so the CMS is built against a real API instead of a temporary one (see below)
+7. Admin CMS — next
 9. SEO implementation
 10. Security hardening
 11. Responsive optimization
 12. Performance optimization
 13. Testing
 14. cPanel deployment documentation
+
+**Phase 8 in detail (what actually exists in `backend/`):** a custom `.env` loader and PDO singleton (`config/`); session/CSRF/RBAC/password/audit-log primitives, a generic `Validator`, a generic `CrudResource` engine (list/find/create/update/delete/child-row-replace, injection-safe via a fixed field allowlist per resource), and MIME-sniffing upload handling with SVG script-injection rejection (`includes/`); a file-based fixed-window rate limiter for auth and public enquiry submission (`api/middleware/`); ~20 handler files covering every public route plus a fully permission-gated `/admin/*` surface (`api/handlers/`); and a regex-route front controller with CORS and CSRF enforcement (`api/index.php`). `database/seed.sql` was generated directly from the frontend's placeholder data modules (via a one-time Node extraction script, not retyped) so every slug matches exactly, then applied against a real MariaDB instance and exercised end-to-end with `curl`: every public route, the full admin CRUD/publish/delete path, Super Admin vs. Editor permission boundaries, CSRF rejection, auth rate-limit lockout, and malicious SVG upload rejection. One real bug was caught and fixed in the process: the frontend's own course `slugify()` stripped `+` before collapsing punctuation, silently colliding four course-title pairs (e.g. "CGEH Elite Plus" / "CGEH Elite Plus+") onto the same slug — fixed at the source in `frontend/src/data/coursesPlaceholder.js` since it affects the live catalogue, not just the seed export.
 
 Each phase ends in a working, committed state — not one giant final commit (spec §52).
 
