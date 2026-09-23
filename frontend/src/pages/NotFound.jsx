@@ -2,7 +2,7 @@ import Button from '../components/ui/Button'
 import { useSeo } from '../hooks/useSeo'
 
 export default function NotFound() {
-  useSeo({ title: 'Page Not Found | GIIS India' })
+  useSeo({ title: 'Page Not Found | GIIS India', robots: 'noindex,follow' })
 
   return (
     <div className="container flex min-h-[60vh] flex-col items-center justify-center py-24 text-center">

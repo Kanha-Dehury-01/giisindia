@@ -68,3 +68,68 @@ export function buildOrganizationSchema(origin = typeof window !== 'undefined' ?
     parentOrganization: { '@type': 'Organization', name: 'Threatsys' },
   }
 }
+
+// Site-wide WebSite schema with a SearchAction pointing at the real
+// Knowledge Center search endpoint — genuinely functional, not decorative
+// (spec §32: no structured data "simply for manipulation").
+export function buildWebsiteSchema(origin = typeof window !== 'undefined' ? window.location.origin : '') {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'GIIS India',
+    url: origin,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${origin}/knowledge-center/search?q={search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    },
+  }
+}
+
+// FAQPage schema — only where the visible accordion content on the page
+// IS this exact Q&A list, never a subset (docs/ARCHITECTURE.md §L). The
+// homepage's FAQ preview deliberately does not use this.
+export function buildFaqPageSchema(faqs) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: { '@type': 'Answer', text: faq.answer },
+    })),
+  }
+}
+
+// Person schema — leadership/faculty profiles with a real name and bio
+// only (never fabricated credentials).
+export function buildPersonSchema(member, origin = typeof window !== 'undefined' ? window.location.origin : '') {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: member.name,
+    jobTitle: member.designation,
+    description: member.biography,
+    worksFor: { '@type': 'Organization', name: 'GIIS', url: origin },
+  }
+}
+
+// Event schema — only for a real, dated event/workshop/webinar.
+export function buildEventSchema(event, url) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: event.title,
+    description: event.description,
+    startDate: event.start_date,
+    endDate: event.end_date ?? undefined,
+    eventAttendanceMode: event.is_online
+      ? 'https://schema.org/OnlineEventAttendanceMode'
+      : 'https://schema.org/OfflineEventAttendanceMode',
+    location: event.is_online
+      ? { '@type': 'VirtualLocation', url }
+      : { '@type': 'Place', name: event.location ?? 'GIIS' },
+    organizer: { '@type': 'Organization', name: 'GIIS' },
+    url,
+  }
+}

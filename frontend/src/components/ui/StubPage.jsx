@@ -10,7 +10,10 @@ import { useSeo } from '../../hooks/useSeo'
  * wholesale.
  */
 export default function StubPage({ eyebrow, title, description, breadcrumbs, phaseNote }) {
-  useSeo({ title: `${title} | GIIS India`, description })
+  // noindex: this route's real content template hasn't shipped yet — never
+  // let a placeholder/dev-note page outrank or duplicate the real one once
+  // it exists (spec §32 — no thin/placeholder content indexed as real).
+  useSeo({ title: `${title} | GIIS India`, description, robots: 'noindex,follow' })
 
   return (
     <div>

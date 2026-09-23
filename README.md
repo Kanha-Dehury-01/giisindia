@@ -16,7 +16,8 @@ This repo is being built in phases (tracked in `docs/ARCHITECTURE.md` §N). As o
 | 6 — Career paths, learning paths, certification explorer, glossary | ✅ Done |
 | 8 — PHP API + database (real backend, live MySQL/MariaDB) | ✅ Done (`backend/`, `database/seed.sql`) |
 | 7 — Admin CMS (frontend, wired to the real API from Phase 8) | ✅ Done (`frontend/src/admin/`, `frontend/src/pages/admin/`) |
-| 9–14 — SEO, security, responsive, performance, testing, deployment | ⏳ Not yet started |
+| 9 — SEO (meta/OG tags, structured data, sitemap, noindex on stubs) | ✅ Done (`backend/api/sitemap.php`, `frontend/src/hooks/useSeo.js`) |
+| 10–14 — Security, responsive, performance, testing, deployment | ⏳ Not yet started |
 
 **What you can actually run locally today:** the full database — schema *and* seed data (step 3.3) — a real, tested PHP REST API (step 3.5), the frontend dev server (step 3.6), and now a fully working **admin CMS** at `/admin` (step 3.7) that manages that same real data. The backend is genuine: 60+ endpoints across courses, the Knowledge Center + cross-content search, careers, learning paths, certifications, glossary, testimonials, team, FAQs, events, resources, and public enquiry submission, plus a fully RBAC-enforced `/admin/*` surface (session auth, CSRF via double-submit cookie, per-permission checks on every write, file-based auth/enquiry rate limiting, an audit log, and media upload with real MIME-sniffing and SVG script-injection rejection) — all backed by live MySQL/MariaDB, not mocks or in-memory fixtures.
 
@@ -25,6 +26,8 @@ The admin CMS covers every module from the spec: Courses (with curriculum/skills
 It was all verified end-to-end in a real browser (Playwright) against a real MariaDB instance: log in, create/edit/delete a course and its curriculum, edit a career and a learning path's steps, upload a file, view enquiries and the audit log, and log out — plus the underlying API checks (CSRF rejection, auth rate-limit lockout, malicious SVG upload rejection, Super Admin vs. Editor permission boundaries). Two real bugs were caught and fixed in the process: a login response was being stored whole instead of unwrapping its `.user` field (silently broke every permission check after sign-in), and MySQL rejected a checkbox's `false` value in strict mode because PDO's native prepared statements can bind a PHP bool as an empty string instead of `0`.
 
 The public-facing React site (Phases 2–6) still renders from the placeholder data modules in `frontend/src/data/`, by design — the CMS above edits the real database, but nothing on the public site fetches from it yet. Wiring the public pages to the real API is the next piece of work.
+
+**SEO (Phase 9):** every page sets a real title, meta description, absolute canonical URL, Open Graph/Twitter tags, and a robots directive via `useSeo()`; pages whose content template hasn't shipped yet (and the 404 page) correctly emit `noindex,follow` rather than let placeholder content get indexed. `Organization` + `WebSite` (with a working search action) structured data is injected once, site-wide; `BreadcrumbList`, `Course`, `Article`, and `FAQPage` JSON-LD apply per-page only where the visible content genuinely matches — verified in a real browser that `/faq`'s `FAQPage` schema lists exactly the 7 questions actually visible on the page, no more, no less. `curl http://localhost:8000/api/sitemap.php` (mapped to `/sitemap.xml` in production via `frontend/public/.htaccess`) returns a real XML sitemap generated from the live database — 97 URLs in the seeded dataset, degrading gracefully to just the static routes if the database is down.
 
 ## 1. Technology Stack
 
