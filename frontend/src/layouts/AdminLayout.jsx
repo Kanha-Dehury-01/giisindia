@@ -85,7 +85,12 @@ export default function AdminLayout() {
         </div>
       )}
 
-      <div className="flex flex-1 flex-col">
+      {/* min-w-0 overrides the flex-item default of min-width:auto — without
+          it this column refuses to shrink below a wide child's (e.g. an
+          admin data table's) intrinsic width, so the inner overflow-x-auto
+          on DataTable never gets a chance to kick in and the whole page
+          scrolls horizontally instead. */}
+      <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-border bg-surface px-4 py-3 md:px-6">
           <button
             type="button"
@@ -104,7 +109,7 @@ export default function AdminLayout() {
             Sign out
           </button>
         </header>
-        <main className="flex-1 p-4 md:p-8">
+        <main className="min-w-0 flex-1 p-4 md:p-8">
           <Outlet />
         </main>
       </div>
